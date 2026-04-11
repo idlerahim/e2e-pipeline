@@ -1,14 +1,15 @@
 /.venv
 /.vscode
-/dataset
+
 /data_lake
+/dataset
 /mlruns
-/logs
-/reports
 
 mlflow.db
 prefect.db
 prefect.db-shm
 prefect.db-wal
 mlflow.db
-/models
+
+/logs
+/reports
