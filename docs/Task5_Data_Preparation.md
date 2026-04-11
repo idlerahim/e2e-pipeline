@@ -25,21 +25,21 @@ python -m preparation.prepare_data
 
 | Dataset               | Cleaning Applied                                                                                        |
 | --------------------- | ------------------------------------------------------------------------------------------------------- |
-| **Customers**   | De-duplicated by `customer_unique_id` (99,441 → 96,096), standardized city/state                     |
-| **Products**    | Translated categories PT→EN, imputed 610 missing category names, imputed 2 missing dimensions (median) |
-| **Orders**      | Parsed timestamps, filtered to**delivered only** (99,441 → 96,478, keeping 97%)                  |
-| **Reviews**     | Filled missing text with empty string, added `has_review_text` flag                                   |
-| **Payments**    | Aggregated per order (total_payment, num_payments, primary_payment_type)                                |
-| **Geolocation** | De-duplicated by zip (1M → 19,008), removed lat/lng outliers outside Brazil                            |
+| **Customers**   | De-duplicated by `customer_unique_id`, standardized city/state (10,000 rows)                     |
+| **Products**    | Translated categories PT→EN, imputed 188 missing category names, imputed 3 missing dimensions (median) |
+| **Orders**      | Parsed timestamps, filtered to delivered only (10,000 → valid delivered orders, keeping ~97%)                  |
+| **Reviews**     | Filled missing text with empty string (9,462 rows), added `has_review_text` flag                                   |
+| **Payments**    | Aggregated per order (total_payment, num_payments, primary_payment_type) (10,000 rows)                                |
+| **Geolocation** | De-duplicated by zip (10,000 raw → ~5,000 deduplicated), removed lat/lng outliers outside Brazil                            |
 
 ### Step 2: Merge into Unified Transaction Dataset
 
-Joins: orders × items × reviews × payments × customers × products → **110,840 rows × 27 cols**
+Joins: orders × items × reviews × payments × customers × products → **947 rows × 27 cols**
 
 ### Step 3: User-Item Interaction Matrix
 
-- **93,263 users** × **31,439 items** → **96,739 interactions**
-- **Sparsity: 99.997%** (typical for recommendation systems)
+- **86 users** × **791 items** → **89 interactions**
+- **Sparsity: 99.87%** (typical for recommendation systems)
 - Contains: `customer_unique_id`, `product_id`, `rating`, `purchase_count`, `implicit`
 
 ### Step 4: EDA Plots (8 visualizations)
@@ -57,13 +57,13 @@ Joins: orders × items × reviews × payments × customers × products → **110
 
 | Output                                 | Location                                                             |
 | -------------------------------------- | -------------------------------------------------------------------- |
-| Transactions dataset (cleaned, merged) | `data_lake/curated/prepared/YYYY-MM-DD/transactions.csv`           |
-| User-item interaction matrix           | `data_lake/curated/prepared/YYYY-MM-DD/user_item_interactions.csv` |
-| Cleaned products                       | `data_lake/curated/prepared/YYYY-MM-DD/products_cleaned.csv`       |
-| Cleaned customers                      | `data_lake/curated/prepared/YYYY-MM-DD/customers_cleaned.csv`      |
-| Summary stats (JSON)                   | `data_lake/curated/prepared/YYYY-MM-DD/preparation_summary.json`   |
-| EDA plots (8 PNGs)                     | `reports/eda_plots/`                                               |
-| Preparation log                        | `logs/preparation.log`                                             |
+| Transactions dataset (cleaned, merged) | `data_lake/curated/prepared/2026-04-11/transactions.csv` (947 rows) |
+| User-item interaction matrix           | `data_lake/curated/prepared/2026-04-11/user_item_interactions.csv` (89 interactions) |
+| Cleaned products                       | `data_lake/curated/prepared/2026-04-11/products_cleaned.csv` (791 products) |
+| Cleaned customers                      | `data_lake/curated/prepared/2026-04-11/customers_cleaned.csv` (86 unique users) |
+| Summary stats (JSON)                   | `data_lake/curated/prepared/2026-04-11/preparation_summary.json` |
+| EDA plots (8 PNGs)                     | `reports/eda_plots/` |
+| Preparation log                        | `logs/preparation.log` |
 
 ## Files Involved
 
