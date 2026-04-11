@@ -204,11 +204,60 @@ Open http://localhost:5000/
 cat reports/model_performance_report.md
 ```
 
+## How to Make Predictions
+
+### Quick Start (Easiest Approach) 🚀
+
+After training models, get recommendations in one command:
+
+```bash
+# Get top-5 NMF recommendations for a user
+python -m models.predict --user-id "012755131a5b785b0ae3291c339a9051" --model NMF --top-k 5
+
+# Get top-10 KNN-based recommendations
+python -m models.predict --user-id "012755131a5b785b0ae3291c339a9051" --model KNN --top-k 10
+
+# Get content-based recommendations
+python -m models.predict --user-id "012755131a5b785b0ae3291c339a9051" --model Content --top-k 5
+
+# Predict rating for a specific product
+python -m models.predict --user-id "012755131a5b785b0ae3291c339a9051" --product-id "product_id_123" --model NMF
+```
+
+**Expected Output:**
+
+```
+======================================================================
+  RocoMart Prediction Engine
+======================================================================
+  User ID: 012755131a5b785b0ae3291c339a9051
+  Model:   NMF
+  Run ID:  abc123def456
+======================================================================
+
+Top 5 Recommendations:
+  1. Product: prod_12345            | Predicted Rating: 4.85
+  2. Product: prod_67890            | Predicted Rating: 4.73
+  3. Product: prod_11111            | Predicted Rating: 4.61
+  4. Product: prod_22222            | Predicted Rating: 4.52
+  5. Product: prod_33333            | Predicted Rating: 4.41
+```
+
+### Available Models
+
+| Model             | Command             | Description                                  |
+| ----------------- | ------------------- | -------------------------------------------- |
+| **NMF**     | `--model NMF`     | Matrix factorization collaborative filtering |
+| **KNN**     | `--model KNN`     | Item-based k-nearest neighbors               |
+| **Content** | `--model Content` | Content-based using product features         |
+
 ## Files Involved
 
 ```
 models/model_training.py         ← Main training script (entry point)
+models/predict.py                ← Prediction script for making recommendations
 models/evaluation_metrics.py     ← Ranking metrics (precision, recall, NDCG, MAP)
+feature_store/feature_store_manager.py  ← Load user/item features
 config/pipeline_config.yaml      ← Path configuration
 ingestion/utils.py               ← Shared utilities
 reports/model_performance_report.md ← Auto-generated performance report
