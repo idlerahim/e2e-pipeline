@@ -15,7 +15,7 @@ This flow can run locally or be deployed via Prefect.
 
 import os
 import sys
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
 
 # Add project root to path for task imports
@@ -43,7 +43,7 @@ def get_config_path(config_path: str | None = None) -> str:
     return str(project_root / "config" / "pipeline_config.yaml")
 
 
-@task(retries=1, retry_delay_seconds=timedelta(seconds=5), name="Data Ingestion")
+@task(retries=1, retry_delay_seconds=5, name="Data Ingestion")
 def run_data_ingestion(config_path: str | None = None) -> dict:
     logger = get_run_logger()
     logger.info("Starting data ingestion stage")
@@ -54,10 +54,14 @@ def run_data_ingestion(config_path: str | None = None) -> dict:
 
     csv_success = all(r.get("status") == "SUCCESS" for r in csv_results)
     api_success = all(r.get("status") == "SUCCESS" for r in api_results)
-    status = "SUCCESS" if csv_success and api_success else "FAILED"
+    
+    # CSV ingestion is critical; API ingestion is optional (supplementary data)
+    status = "SUCCESS" if csv_success else "FAILED"
 
     logger.info(f"CSV ingestion success: {csv_success}")
     logger.info(f"API ingestion success: {api_success}")
+    if not api_success:
+        logger.warning("API ingestion failed, but continuing with CSV data (API is optional)")
 
     return {
         "stage": "Data Ingestion",
@@ -67,7 +71,7 @@ def run_data_ingestion(config_path: str | None = None) -> dict:
     }
 
 
-@task(retries=1, retry_delay_seconds=timedelta(seconds=5), name="Data Validation")
+@task(retries=1, retry_delay_seconds=5, name="Data Validation")
 def run_data_validation(config_path: str | None = None) -> dict:
     logger = get_run_logger()
     logger.info("Starting data validation stage")
@@ -87,7 +91,7 @@ def run_data_validation(config_path: str | None = None) -> dict:
     }
 
 
-@task(retries=1, retry_delay_seconds=timedelta(seconds=5), name="Data Preparation")
+@task(retries=1, retry_delay_seconds=5, name="Data Preparation")
 def run_data_preparation(config_path: str | None = None) -> dict:
     logger = get_run_logger()
     logger.info("Starting data preparation stage")
@@ -106,7 +110,7 @@ def run_data_preparation(config_path: str | None = None) -> dict:
     }
 
 
-@task(retries=1, retry_delay_seconds=timedelta(seconds=5), name="Feature Engineering")
+@task(retries=1, retry_delay_seconds=5, name="Feature Engineering")
 def run_feature_engineering_stage(config_path: str | None = None) -> dict:
     logger = get_run_logger()
     logger.info("Starting feature engineering stage")
@@ -125,7 +129,7 @@ def run_feature_engineering_stage(config_path: str | None = None) -> dict:
     }
 
 
-@task(retries=1, retry_delay_seconds=timedelta(seconds=5), name="Feature Store")
+@task(retries=1, retry_delay_seconds=5, name="Feature Store")
 def run_feature_store_stage(config_path: str | None = None) -> dict:
     logger = get_run_logger()
     logger.info("Starting feature store stage")
@@ -204,7 +208,7 @@ def generate_pipeline_report(stage_results: list[dict]) -> str:
     ]
 
     for result in stage_results:
-        status_symbol = "✅" if result["status"] == "SUCCESS" else "❌"
+        status_symbol = "[OK]" if result["status"] == "SUCCESS" else "[FAIL]"
         lines.append(f"- **{result['stage']}**: {status_symbol} {result['status']}")
         if result.get("training_set_path"):
             lines.append(f"  - Training set: `{result['training_set_path']}`")
@@ -226,7 +230,7 @@ def generate_pipeline_report(stage_results: list[dict]) -> str:
 @flow(name="RocoMart_Data_Pipeline", log_prints=True)
 def rocomart_data_pipeline(config_path: str | None = None):
     logger = get_run_logger()
-    logger.info("🚀 Starting RocoMart Data Pipeline")
+    logger.info("Starting RocoMart Data Pipeline")
 
     ingestion_result = run_data_ingestion(config_path=config_path)
     validation_result = run_data_validation(config_path=config_path)

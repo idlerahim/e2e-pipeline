@@ -76,7 +76,7 @@ def initialize_data_lake(cfg: dict, logger) -> dict:
     for layer, description in LAKE_LAYERS.items():
         layer_path = ensure_directory(os.path.join(lake_root, layer))
         created[layer] = layer_path
-        logger.info(f"  Layer '{layer}' → {layer_path}  ({description})")
+        logger.info(f"  Layer '{layer}' -> {layer_path}  ({description})")
 
     return created
 
@@ -197,10 +197,10 @@ def verify_checksums(catalog: list, logger) -> dict:
         })
         if match:
             results["verified"] += 1
-            logger.info(f"  ✓ MATCH  {entry['relative_path']}")
+            logger.info(f"  [OK] MATCH  {entry['relative_path']}")
         else:
             results["mismatched"] += 1
-            logger.warning(f"  ✗ MISMATCH  {entry['relative_path']}  expected={expected}  actual={actual}")
+            logger.warning(f"  [FAIL] MISMATCH  {entry['relative_path']}  expected={expected}  actual={actual}")
 
     return results
 

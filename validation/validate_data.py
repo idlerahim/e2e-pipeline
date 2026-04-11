@@ -360,7 +360,7 @@ def generate_markdown_report(all_reports: list, output_path: str):
     for i, r in enumerate(all_reports, 1):
         total_missing = sum(v["missing_count"] for v in r["missing_values"].values())
         full_dupes = next((d["count"] for d in r["duplicate_checks"] if d["check"] == "full_row_duplicates"), 0)
-        status_icon = "✓" if r["overall_status"] == "PASS" else ("⚠" if r["overall_status"] == "WARNING" else "✗")
+        status_icon = "[OK]" if r["overall_status"] == "PASS" else ("[W]" if r["overall_status"] == "WARNING" else "[FAIL]")
         lines.append(
             f"| {i} | `{r['file']}` | {r['rows']:,} | {r['columns']} | "
             f"{r['overall_completeness_pct']}% | {full_dupes:,} | {status_icon} {r['overall_status']} |"
@@ -418,7 +418,7 @@ def run_validation(config_path: str = None):
     logs_dir = ensure_directory(os.path.join(project_root, cfg["paths"]["logs_dir"]))
 
     logger.info("=" * 70)
-    logger.info("DATA PROFILING & VALIDATION — START")
+    logger.info("DATA PROFILING & VALIDATION - START")
     logger.info(f"  Timestamp : {datetime.now().isoformat()}")
     logger.info(f"  Raw layer  : {raw_layer}")
     logger.info(f"  Source     : {source_dir}")
@@ -439,16 +439,16 @@ def run_validation(config_path: str = None):
         logger.info(f"Validating: {filename}")
 
         if not os.path.isfile(filepath):
-            logger.error(f"  FILE NOT FOUND — skipping: {filepath}")
+            logger.error(f"  FILE NOT FOUND - skipping: {filepath}")
             all_reports.append({"file": filename, "overall_status": "ERROR", "detail": "File not found"})
             continue
 
         try:
             report = validate_dataset(filepath, filename, schema, logger)
             all_reports.append(report)
-            logger.info(f"  → Overall: {report['overall_status']}")
+            logger.info(f"  -> Overall: {report['overall_status']}")
         except Exception as exc:
-            logger.exception(f"  ✗ FAILED: {exc}")
+            logger.exception(f"  [FAIL] FAILED: {exc}")
             all_reports.append({"file": filename, "overall_status": "ERROR", "detail": str(exc)})
 
     # Save JSON report
@@ -469,7 +469,7 @@ def run_validation(config_path: str = None):
     err_count = sum(1 for r in all_reports if r.get("overall_status") == "ERROR")
 
     logger.info("=" * 70)
-    logger.info("DATA PROFILING & VALIDATION — COMPLETE")
+    logger.info("DATA PROFILING & VALIDATION - COMPLETE")
     logger.info(f"  Total datasets : {len(all_reports)}")
     logger.info(f"  PASS           : {pass_count}")
     logger.info(f"  WARNING        : {warn_count}")

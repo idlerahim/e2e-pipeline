@@ -97,7 +97,7 @@ def load_datasets(source_dir: str, raw_layer: str, logger) -> dict:
             raise FileNotFoundError(f"Required dataset file not found: {path}")
 
         dfs[key] = pd.read_csv(path, low_memory=False)
-        logger.info(f"    → {len(dfs[key]):,} rows × {len(dfs[key].columns)} cols")
+        logger.info(f"    -> {len(dfs[key]):,} rows x {len(dfs[key].columns)} cols")
     return dfs
 
 
@@ -110,7 +110,7 @@ def clean_customers(df: pd.DataFrame, logger) -> pd.DataFrame:
     df = df.drop_duplicates(subset=["customer_unique_id"], keep="first").copy()
     df["customer_city"] = df["customer_city"].str.strip().str.lower()
     df["customer_state"] = df["customer_state"].str.strip().str.upper()
-    logger.info(f"    → {len(df):,} unique customers")
+    logger.info(f"    -> {len(df):,} unique customers")
     return df
 
 
@@ -134,7 +134,7 @@ def clean_products(df: pd.DataFrame, cat_df: pd.DataFrame, logger) -> pd.DataFra
             df[col] = df[col].fillna(median_val)
             logger.info(f"    Imputed {col}: {df[col].isnull().sum()} remaining nulls (median={median_val:.1f})")
 
-    logger.info(f"    → {len(df):,} products, {df['category_english'].nunique()} categories")
+    logger.info(f"    -> {len(df):,} products, {df['category_english'].nunique()} categories")
     return df
 
 
@@ -150,7 +150,7 @@ def clean_orders(df: pd.DataFrame, logger) -> pd.DataFrame:
     # Keep only delivered orders for model training
     total = len(df)
     df_delivered = df[df["order_status"] == "delivered"].copy()
-    logger.info(f"    Filtered: {total:,} → {len(df_delivered):,} delivered orders "
+    logger.info(f"    Filtered: {total:,} -> {len(df_delivered):,} delivered orders "
                 f"({len(df_delivered)/total*100:.1f}%)")
     return df_delivered
 
@@ -162,7 +162,7 @@ def clean_reviews(df: pd.DataFrame, logger) -> pd.DataFrame:
     df["review_comment_title"] = df["review_comment_title"].fillna("")
     df["review_comment_message"] = df["review_comment_message"].fillna("")
     df["has_review_text"] = (df["review_comment_message"].str.len() > 0).astype(int)
-    logger.info(f"    → {len(df):,} reviews, {df['has_review_text'].sum():,} with text")
+    logger.info(f"    -> {len(df):,} reviews, {df['has_review_text'].sum():,} with text")
     return df
 
 
@@ -174,7 +174,7 @@ def clean_payments(df: pd.DataFrame, logger) -> pd.DataFrame:
         num_payments=("payment_sequential", "max"),
         primary_payment_type=("payment_type", "first"),
     ).reset_index()
-    logger.info(f"    → {len(agg):,} orders with payment info")
+    logger.info(f"    -> {len(agg):,} orders with payment info")
     return agg
 
 
@@ -185,7 +185,7 @@ def clean_geolocation(df: pd.DataFrame, logger) -> pd.DataFrame:
     # Filter to valid Brazil bounds
     df = df[(df["geolocation_lat"] >= -60) & (df["geolocation_lat"] <= 10) &
             (df["geolocation_lng"] >= -80) & (df["geolocation_lng"] <= -30)]
-    logger.info(f"    → {len(df):,} unique zip codes")
+    logger.info(f"    -> {len(df):,} unique zip codes")
     return df
 
 
@@ -275,7 +275,7 @@ def generate_eda_plots(txn: pd.DataFrame, interactions: pd.DataFrame,
     plt.tight_layout()
     plt.savefig(os.path.join(plots_dir, "01_review_score_distribution.png"), dpi=150)
     plt.close()
-    logger.info("    ✓ 01_review_score_distribution.png")
+    logger.info("    [OK] 01_review_score_distribution.png")
 
     # --- Plot 2: Top 15 Product Categories ---
     fig, ax = plt.subplots(figsize=(10, 6))
@@ -286,7 +286,7 @@ def generate_eda_plots(txn: pd.DataFrame, interactions: pd.DataFrame,
     plt.tight_layout()
     plt.savefig(os.path.join(plots_dir, "02_top_categories.png"), dpi=150)
     plt.close()
-    logger.info("    ✓ 02_top_categories.png")
+    logger.info("    [OK] 02_top_categories.png")
 
     # --- Plot 3: Item Popularity (Long Tail) ---
     fig, ax = plt.subplots(figsize=(10, 5))
@@ -297,12 +297,12 @@ def generate_eda_plots(txn: pd.DataFrame, interactions: pd.DataFrame,
     ax.fill_between(range(len(item_pop)), item_pop["count"], alpha=0.3, color=COLORS[3])
     ax.set_xlabel("Product Rank", fontsize=12)
     ax.set_ylabel("Number of Purchases", fontsize=12)
-    ax.set_title("Item Popularity — Long Tail Distribution", fontsize=14, fontweight="bold")
+    ax.set_title("Item Popularity - Long Tail Distribution", fontsize=14, fontweight="bold")
     ax.set_xlim(0, len(item_pop))
     plt.tight_layout()
     plt.savefig(os.path.join(plots_dir, "03_item_popularity_long_tail.png"), dpi=150)
     plt.close()
-    logger.info("    ✓ 03_item_popularity_long_tail.png")
+    logger.info("    [OK] 03_item_popularity_long_tail.png")
 
     # --- Plot 4: User Activity Distribution ---
     fig, ax = plt.subplots(figsize=(8, 5))
@@ -315,7 +315,7 @@ def generate_eda_plots(txn: pd.DataFrame, interactions: pd.DataFrame,
     plt.tight_layout()
     plt.savefig(os.path.join(plots_dir, "04_user_activity_distribution.png"), dpi=150)
     plt.close()
-    logger.info("    ✓ 04_user_activity_distribution.png")
+    logger.info("    [OK] 04_user_activity_distribution.png")
 
     # --- Plot 5: Purchase Volume Over Time ---
     fig, ax = plt.subplots(figsize=(12, 5))
@@ -329,7 +329,7 @@ def generate_eda_plots(txn: pd.DataFrame, interactions: pd.DataFrame,
     plt.tight_layout()
     plt.savefig(os.path.join(plots_dir, "05_monthly_purchase_volume.png"), dpi=150)
     plt.close()
-    logger.info("    ✓ 05_monthly_purchase_volume.png")
+    logger.info("    [OK] 05_monthly_purchase_volume.png")
 
     # --- Plot 6: Purchase Hour Heatmap ---
     fig, ax = plt.subplots(figsize=(10, 5))
@@ -343,7 +343,7 @@ def generate_eda_plots(txn: pd.DataFrame, interactions: pd.DataFrame,
     plt.tight_layout()
     plt.savefig(os.path.join(plots_dir, "06_purchase_heatmap.png"), dpi=150)
     plt.close()
-    logger.info("    ✓ 06_purchase_heatmap.png")
+    logger.info("    [OK] 06_purchase_heatmap.png")
 
     # --- Plot 7: Price Distribution ---
     fig, ax = plt.subplots(figsize=(8, 5))
@@ -355,7 +355,7 @@ def generate_eda_plots(txn: pd.DataFrame, interactions: pd.DataFrame,
     plt.tight_layout()
     plt.savefig(os.path.join(plots_dir, "07_price_distribution.png"), dpi=150)
     plt.close()
-    logger.info("    ✓ 07_price_distribution.png")
+    logger.info("    [OK] 07_price_distribution.png")
 
     # --- Plot 8: Payment Type Distribution ---
     fig, ax = plt.subplots(figsize=(8, 5))
@@ -366,7 +366,7 @@ def generate_eda_plots(txn: pd.DataFrame, interactions: pd.DataFrame,
     plt.tight_layout()
     plt.savefig(os.path.join(plots_dir, "08_payment_type_distribution.png"), dpi=150)
     plt.close()
-    logger.info("    ✓ 08_payment_type_distribution.png")
+    logger.info("    [OK] 08_payment_type_distribution.png")
 
     logger.info(f"  All plots saved to: {plots_dir}")
 
@@ -385,7 +385,7 @@ def run_preparation(config_path: str = None):
     plots_dir = ensure_directory(os.path.join(project_root, "reports", "eda_plots"))
 
     logger.info("=" * 70)
-    logger.info("DATA PREPARATION & EDA — START")
+    logger.info("DATA PREPARATION & EDA - START")
     logger.info(f"  Timestamp : {datetime.now().isoformat()}")
     logger.info(f"  Raw layer : {raw_layer}")
     logger.info("=" * 70)
@@ -451,7 +451,7 @@ def run_preparation(config_path: str = None):
     logger.info(f"    Summary: {stats_path}")
 
     logger.info("=" * 70)
-    logger.info("DATA PREPARATION & EDA — COMPLETE")
+    logger.info("DATA PREPARATION & EDA - COMPLETE")
     logger.info(f"  Transactions : {stats['transaction_rows']:,}")
     logger.info(f"  Users        : {stats['unique_users']:,}")
     logger.info(f"  Products     : {stats['unique_products']:,}")

@@ -92,7 +92,7 @@ def build_user_features(txn: pd.DataFrame, logger) -> pd.DataFrame:
     float_cols = uf.select_dtypes(include="float").columns
     uf[float_cols] = uf[float_cols].round(4)
 
-    logger.info(f"    → {len(uf):,} users, {len(uf.columns)} features")
+    logger.info(f"    -> {len(uf):,} users, {len(uf.columns)} features")
     return uf
 
 
@@ -148,7 +148,7 @@ def build_item_features(txn: pd.DataFrame, products: pd.DataFrame, logger) -> pd
     float_cols = itf.select_dtypes(include="float").columns
     itf[float_cols] = itf[float_cols].round(4)
 
-    logger.info(f"    → {len(itf):,} items, {len(itf.columns)} features")
+    logger.info(f"    -> {len(itf):,} items, {len(itf.columns)} features")
     return itf
 
 
@@ -174,7 +174,7 @@ def build_interaction_features(interactions: pd.DataFrame, logger) -> pd.DataFra
     float_cols = inf.select_dtypes(include="float").columns
     inf[float_cols] = inf[float_cols].round(4)
 
-    logger.info(f"    → {len(inf):,} interactions, {len(inf.columns)} features")
+    logger.info(f"    -> {len(inf):,} interactions, {len(inf.columns)} features")
     return inf
 
 
@@ -322,7 +322,7 @@ def generate_feature_summary(registry: list, uf: pd.DataFrame, itf: pd.DataFrame
         "",
         "| Transformation | Formula | Applied To |",
         "|---------------|---------|-----------|",
-        "| **Min-Max Normalization** | `(x - min) / (max - min)` → [0, 1] | spending, AOV, price, sold, rating |",
+        "| **Min-Max Normalization** | `(x - min) / (max - min)` -> [0, 1] | spending, AOV, price, sold, rating |",
         "| **Log Transform** | `log(1 + x)` | purchase_count, total_spending |",
         "| **One-Hot Encoding** | Binary 0/1 for each category | Top 10 categories + 'other' |",
         "| **Rank** | Ascending/descending integer rank | popularity_rank, price_percentile |",
@@ -359,7 +359,7 @@ def run_feature_engineering(config_path: str = None):
     schema_path = os.path.join(project_root, "transformation", "schema.sql")
 
     logger.info("=" * 70)
-    logger.info("FEATURE ENGINEERING — START")
+    logger.info("FEATURE ENGINEERING - START")
     logger.info(f"  Timestamp : {datetime.now().isoformat()}")
     logger.info(f"  Input     : {input_dir}")
     logger.info(f"  Output    : {features_dir}")
@@ -428,7 +428,7 @@ def run_feature_engineering(config_path: str = None):
         json.dump(meta, f, indent=2)
 
     logger.info("=" * 70)
-    logger.info("FEATURE ENGINEERING — COMPLETE")
+    logger.info("FEATURE ENGINEERING - COMPLETE")
     logger.info(f"  User features        : {len(uf):,} rows × {len(uf.columns)} cols")
     logger.info(f"  Item features        : {len(itf):,} rows × {len(itf.columns)} cols")
     logger.info(f"  Interaction features : {len(inf):,} rows × {len(inf.columns)} cols")

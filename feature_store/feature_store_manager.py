@@ -105,14 +105,14 @@ class FeatureStoreManager:
         # Copy the features DB to this snapshot
         dest_db_path = os.path.join(snapshot_dir, "features.db")
         shutil.copy2(source_db_path, dest_db_path)
-        self.logger.info(f"  Copied DB → {dest_db_path}")
+        self.logger.info(f"  Copied DB -> {dest_db_path}")
 
         # Copy feature registry JSON
         source_registry = os.path.join(source_features_dir, "feature_registry.json")
         if os.path.exists(source_registry):
             dest_registry = os.path.join(snapshot_dir, "feature_registry.json")
             shutil.copy2(source_registry, dest_registry)
-            self.logger.info(f"  Copied registry → {dest_registry}")
+            self.logger.info(f"  Copied registry -> {dest_registry}")
 
         # Read feature metadata from the DB
         conn = sqlite3.connect(dest_db_path)
@@ -195,7 +195,7 @@ class FeatureStoreManager:
                 best_snapshot = snap
         if best_snapshot is None:
             raise ValueError(f"No snapshot found at or before {target_time}")
-        self.logger.info(f"[PIT] Point-in-time lookup for {target_time} → {best_snapshot['snapshot_id']}")
+        self.logger.info(f"[PIT] Point-in-time lookup for {target_time} -> {best_snapshot['snapshot_id']}")
         return best_snapshot
 
     # ----------------------------------------------------------

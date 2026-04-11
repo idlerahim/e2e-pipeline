@@ -140,7 +140,7 @@ def run_csv_ingestion(config_path: str = None):
     source_files = cfg["csv_ingestion"]["source_files"]
 
     logger.info("=" * 70)
-    logger.info("CSV BATCH INGESTION — START")
+    logger.info("CSV BATCH INGESTION - START")
     logger.info(f"  Timestamp : {datetime.now().isoformat()}")
     logger.info(f"  Source dir: {source_dir}")
     logger.info(f"  Raw layer : {raw_layer}")
@@ -156,11 +156,11 @@ def run_csv_ingestion(config_path: str = None):
         source_name = derive_source_name(filename)
 
         logger.info("-" * 50)
-        logger.info(f"Ingesting: {filename}  →  source={source_name}")
+        logger.info(f"Ingesting: {filename}  ->  source={source_name}")
 
         # --- Guard: file exists? ---------------------------
         if not os.path.isfile(source_path):
-            logger.error(f"  SOURCE FILE NOT FOUND — skipping: {source_path}")
+            logger.error(f"  SOURCE FILE NOT FOUND - skipping: {source_path}")
             results.append({"file": filename, "status": "FAILED", "error": "File not found"})
             failure_count += 1
             continue
@@ -177,16 +177,16 @@ def run_csv_ingestion(config_path: str = None):
             summary = ingest_single_csv(source_path, dest_dir, filename, logger)
             results.append({"file": filename, **summary})
             success_count += 1
-            logger.info(f"  ✓ SUCCESS — {filename}")
+            logger.info(f"  [OK] SUCCESS - {filename}")
 
         except Exception as exc:
-            logger.exception(f"  ✗ FAILED — {filename}: {exc}")
+            logger.exception(f"  [FAIL] FAILED - {filename}: {exc}")
             results.append({"file": filename, "status": "FAILED", "error": str(exc)})
             failure_count += 1
 
     # --- Summary report ------------------------------------
     logger.info("=" * 70)
-    logger.info("CSV BATCH INGESTION — COMPLETE")
+    logger.info("CSV BATCH INGESTION - COMPLETE")
     logger.info(f"  Total files : {len(source_files)}")
     logger.info(f"  Succeeded   : {success_count}")
     logger.info(f"  Failed      : {failure_count}")

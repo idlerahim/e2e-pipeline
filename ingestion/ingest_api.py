@@ -89,7 +89,7 @@ def fetch_with_retry(
             response = requests.get(url, timeout=timeout)
             response.raise_for_status()
             if logger:
-                logger.info(f"  Response: {response.status_code} — {len(response.content)} bytes")
+                logger.info(f"  Response: {response.status_code} - {len(response.content)} bytes")
             return response
 
         except requests.exceptions.RequestException as exc:
@@ -229,7 +229,7 @@ def run_api_ingestion(config_path: str = None):
     endpoints = api_cfg["endpoints"]
 
     logger.info("=" * 70)
-    logger.info("REST API INGESTION — START")
+    logger.info("REST API INGESTION - START")
     logger.info(f"  Timestamp : {datetime.now().isoformat()}")
     logger.info(f"  Base URL  : {base_url}")
     logger.info(f"  Endpoints : {list(endpoints.keys())}")
@@ -242,7 +242,7 @@ def run_api_ingestion(config_path: str = None):
 
     for ep_name, ep_path in endpoints.items():
         logger.info("-" * 50)
-        logger.info(f"Ingesting API endpoint: {ep_name}  →  {ep_path}")
+        logger.info(f"Ingesting API endpoint: {ep_name}  ->  {ep_path}")
 
         dest_dir = build_partition_path(
             base_dir=raw_layer,
@@ -261,16 +261,16 @@ def run_api_ingestion(config_path: str = None):
             )
             results.append({"endpoint": ep_name, **summary})
             success_count += 1
-            logger.info(f"  ✓ SUCCESS — {ep_name}")
+            logger.info(f"  [OK] SUCCESS - {ep_name}")
 
         except Exception as exc:
-            logger.exception(f"  ✗ FAILED — {ep_name}: {exc}")
+            logger.exception(f"  [FAIL] FAILED - {ep_name}: {exc}")
             results.append({"endpoint": ep_name, "status": "FAILED", "error": str(exc)})
             failure_count += 1
 
     # --- Summary report ------------------------------------
     logger.info("=" * 70)
-    logger.info("REST API INGESTION — COMPLETE")
+    logger.info("REST API INGESTION - COMPLETE")
     logger.info(f"  Total endpoints : {len(endpoints)}")
     logger.info(f"  Succeeded       : {success_count}")
     logger.info(f"  Failed          : {failure_count}")

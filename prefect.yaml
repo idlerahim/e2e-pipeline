@@ -1,0 +1,43 @@
+# Prefect Deployment Configuration for RocoMart Pipeline
+
+# This file defines the deployment settings for the RocoMart data pipeline
+# Run with: prefect deploy --prefect-file prefect.yaml
+
+# Deployment name
+name: rocomart-data-pipeline
+
+# Python environment
+python_environment: .venv
+
+# Entry point
+entrypoint: orchestration/pipeline_flow.py:rocomart_data_pipeline
+
+# Work pool (for production deployment)
+work_pool:
+  name: default-work-pool
+  work_queue_name: default
+
+# Schedule (daily at 2 AM)
+schedule:
+  cron: "0 2 * * *"
+  timezone: UTC
+
+# Parameters (can be overridden at runtime)
+parameters:
+  log_level: INFO
+
+# Tags for organization
+tags:
+  - rocomart
+  - data-pipeline
+  - ml
+
+# Description
+description: |
+  End-to-end data pipeline for RocoMart recommendation system:
+  - Data ingestion from APIs and CSVs
+  - Data validation and quality checks
+  - Data preparation and cleaning
+  - Feature engineering
+  - Feature store management
+  - Model training and evaluation
