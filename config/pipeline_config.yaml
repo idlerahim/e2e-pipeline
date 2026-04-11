@@ -1,0 +1,54 @@
+# ============================================================
+# RecoMart Data Pipeline Configuration
+# ============================================================
+
+# --- Paths ---
+paths:
+  source_data_dir: "dataset"                  # Raw source CSV directory
+  data_lake_root: "data_lake"                 # Root of the structured data lake
+  raw_layer: "data_lake/raw"                  # Raw ingestion layer
+  logs_dir: "logs"                            # Log output directory
+
+# --- CSV Ingestion Settings ---
+csv_ingestion:
+  source_files:
+    - "olist_customers_dataset.csv"
+    - "olist_products_dataset.csv"
+    - "olist_orders_dataset.csv"
+    - "olist_order_items_dataset.csv"
+    - "olist_order_reviews_dataset.csv"
+    - "olist_order_payments_dataset.csv"
+    - "olist_sellers_dataset.csv"
+    - "olist_geolocation_dataset.csv"
+    - "product_category_name_translation.csv"
+
+  # Partitioning scheme: source/type/YYYY-MM-DD/
+  partition_by_date: true
+
+# --- API Ingestion Settings ---
+api_ingestion:
+  # Simulated REST API for product data
+  base_url: "https://fakestoreapi.com"
+  endpoints:
+    products: "/products"
+    categories: "/products/categories"
+  
+  # Retry configuration
+  max_retries: 3
+  retry_delay_seconds: 2
+  retry_backoff_factor: 2       # Exponential backoff multiplier
+  request_timeout_seconds: 30
+
+# --- Scheduling ---
+scheduling:
+  csv_ingestion_interval_minutes: 60    # How often to check for new CSV files
+  api_ingestion_interval_minutes: 30    # How often to poll the API
+
+# --- Logging ---
+logging:
+  level: "INFO"
+  format: "%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
+  date_format: "%Y-%m-%d %H:%M:%S"
+  log_file_prefix: "ingestion"
+  max_log_size_mb: 10
+  backup_count: 5
