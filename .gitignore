@@ -1,0 +1,14 @@
+/dataset
+/data_lake
+/.venv
+/mlruns
+/.vscode
+/logs
+/reports
+data_lake.dvc
+dataset.dvc
+mlflow.db
+prefect.db
+prefect.db-shm
+prefect.db-wal
+mlflow.db
