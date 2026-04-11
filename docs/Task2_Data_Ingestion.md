@@ -4,6 +4,7 @@
 
 ```powershell
 # Prequisite
+
 # Virtual environment
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
@@ -38,7 +39,6 @@ python run_ingestion.py --mode csv
 
 # Run only API ingestion
 python run_ingestion.py --mode api
-
 ```
 
 ## Input
