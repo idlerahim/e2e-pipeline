@@ -1,43 +1,66 @@
+# ============================================================
 # Prefect Deployment Configuration for RocoMart Pipeline
+# ============================================================
+#
+# Complete configuration for the RocoMart end-to-end pipeline
+# Run setup with: .\setup_prefect.ps1
+# Or manually:
+#   1. prefect work-pool create -t process "default-work-pool"
+#   2. prefect deploy orchestration/pipeline_flow.py:rocomart_data_pipeline -n "RocoMart Pipeline" -p default-work-pool
+#   3. python -m prefect worker start -p "default-work-pool"
 
-# This file defines the deployment settings for the RocoMart data pipeline
-# Run with: prefect deploy --prefect-file prefect.yaml
-
-# Deployment name
+# ============================================================
+# Deployment Configuration
+# ============================================================
 name: rocomart-data-pipeline
+version: 1.0
+
+# Deployment tracking
+entrypoint: orchestration/pipeline_flow.py:rocomart_data_pipeline
+prefect_version: ">= 2.0"
 
 # Python environment
-python_environment: .venv
+python_environment:
+  type: local
+  path: .venv
 
-# Entry point
-entrypoint: orchestration/pipeline_flow.py:rocomart_data_pipeline
-
-# Work pool (for production deployment)
+# Work pool configuration
 work_pool:
   name: default-work-pool
+  type: process
   work_queue_name: default
 
-# Schedule (daily at 2 AM)
+# Deployment metadata
+deployment:
+  name: RocoMart Pipeline
+  description: |
+    End-to-end data pipeline for RocoMart recommendation system:
+    - Data ingestion from APIs and CSVs
+    - Data validation and quality checks
+    - Data preparation and cleaning
+    - Feature engineering
+    - Feature store management
+    - Model training and evaluation
+  
+  tags:
+    - rocomart
+    - data-pipeline
+    - ml
+    - production
+
+# Schedule (daily at 2 AM UTC)
 schedule:
   cron: "0 2 * * *"
   timezone: UTC
+  active: true
 
-# Parameters (can be overridden at runtime)
+# Runtime parameters
 parameters:
+  config_path: config/pipeline_config.yaml
   log_level: INFO
 
-# Tags for organization
-tags:
-  - rocomart
-  - data-pipeline
-  - ml
-
-# Description
-description: |
-  End-to-end data pipeline for RocoMart recommendation system:
-  - Data ingestion from APIs and CSVs
-  - Data validation and quality checks
-  - Data preparation and cleaning
-  - Feature engineering
-  - Feature store management
-  - Model training and evaluation
+# Execution settings
+execution:
+  type: subprocess
+  env:
+    PREFECT_LOGGING_LEVEL: INFO

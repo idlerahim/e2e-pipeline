@@ -27,11 +27,11 @@ You can configure the messaging broker via environment variables or Prefect conf
 
 ```powershell
 # Option A: Set via environment variable [IMPORTANT for Windows users]
-$env:PREFECT_MESSAGING_BROKER="prefect.server.utilities.messaging.memory"
+prefect config set PREFECT_MESSAGING_BROKER='prefect.server.utilities.messaging.memory'
 prefect server start
 
 # Option B: Set via Prefect config
-prefect config set PREFECT_MESSAGING_BROKER='prefect.server.utilities.messaging.memory'
+$env:PREFECT_MESSAGING_BROKER="prefect.server.utilities.messaging.memory"
 prefect server start
 ```
 
@@ -52,20 +52,10 @@ prefect deploy --prefect-file prefect.yaml
 
 ### 3. Start the Worker
 
-Once the server is running successfully (you'll see the dashboard URL), open a **new terminal** and start the worker using the default work-pool. You can configure the messaging broker via environment variables or Prefect config:
+Once the server is running successfully (you'll see the dashboard URL), open a **new terminal** and start the worker
 
 ```powershell
 python -m prefect worker start -p "default-work-pool"
-
-# Option A: Set via environment variable [IMPORTANT for Windows users]
-$env:PREFECT_MESSAGING_BROKER="prefect.server.utilities.messaging.memory"
-$env:PYTHONIOENCODING="utf-8"
-python -Xutf8 -m prefect worker start -p "default-work-pool"
-
-# Option B: Set via Prefect config
-prefect config set PREFECT_MESSAGING_BROKER='prefect.server.utilities.messaging.memory'
-$env:PYTHONIOENCODING="utf-8"
-python -Xutf8 -m prefect worker start -p "default-work-pool"
 ```
 
 ### 4. Access the UI
