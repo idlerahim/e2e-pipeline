@@ -9,7 +9,6 @@ mlflow.db
 prefect.db
 prefect.db-shm
 prefect.db-wal
-mlflow.db
 
 /logs
 /reports

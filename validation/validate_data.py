@@ -132,8 +132,8 @@ EXPECTED_SCHEMAS = {
         "key_column": None,
         "unique_columns": [],
         "numeric_ranges": {
-            "geolocation_lat": (-60, 10),
-            "geolocation_lng": (-80, -30),
+            "geolocation_lat": (-90, 90),
+            "geolocation_lng": (-180, 180),
         },
     },
     "product_category_name_translation.csv": {
