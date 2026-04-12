@@ -74,7 +74,8 @@ function Get-LatestFSDir {
                -Directory -Filter 'v_*' -ErrorAction SilentlyContinue |
            Sort-Object Name |
            Select-Object -Last 1
-    return if ($dir) { $dir.FullName } else { $null }
+    if ($dir) { return $dir.FullName }
+    return $null
 }
 
 function Query-SQLite {
@@ -97,7 +98,7 @@ Write-Host "  ╔═════════════════════
 Write-Host "  ║              RecoMart  •  End-to-End Pipeline Runner             ║" -ForegroundColor Cyan
 Write-Host "  ╚══════════════════════════════════════════════════════════════════╝" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  9 tasks will run sequentially - no further prompts after you confirm." -ForegroundColor White
+Write-Host "  9 tasks will run sequentially — no further prompts after you confirm." -ForegroundColor White
 Write-Host ""
 
 $summary = @(
@@ -126,8 +127,12 @@ if ($confirm -match '^[Nn]') {
 Write-Host ""
 Write-Host "  Starting pipeline …" -ForegroundColor Cyan
 
+# Ensure Python subprocesses can print Unicode (✓, ╫, etc.) on Windows consoles
+$env:PYTHONIOENCODING = "utf-8"
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+
 # ═════════════════════════════════════════════════════════════════════════════
-#  TASK 1 - Problem Formulation
+#  TASK 1 — Problem Formulation
 # ═════════════════════════════════════════════════════════════════════════════
 Write-TaskHeader 1 "Problem Formulation"
 
@@ -135,12 +140,12 @@ Write-Host "  RecoMart Pipeline : Building a personalized product recommendation
 Write-Host "  Goal              : Ingest, validate & serve data to boost conversions and reduce churn." -ForegroundColor Gray
 Write-Host ""
 
-$t1Pass = $true     # purely informational - no executable to fail
+$t1Pass = $true     # purely informational — no executable to fail
 Write-Status $t1Pass "Task 1 – Problem Formulation"
 Add-Result "1 – Problem Formulation" "N/A" "Console output" $t1Pass
 
 # ═════════════════════════════════════════════════════════════════════════════
-#  TASK 2 - Data Ingestion
+#  TASK 2 — Data Ingestion
 # ═════════════════════════════════════════════════════════════════════════════
 Write-TaskHeader 2 "Data Ingestion  (venv / git / dvc setup skipped)"
 
@@ -154,7 +159,7 @@ Write-Status $t2Pass "Task 2 – Data Ingestion"
 Add-Result "2 – Data Ingestion" "Raw CSV source files" "data_lake/raw/*" $t2Pass
 
 # ═════════════════════════════════════════════════════════════════════════════
-#  TASK 3 - Raw Data Storage
+#  TASK 3 — Raw Data Storage
 # ═════════════════════════════════════════════════════════════════════════════
 Write-TaskHeader 3 "Raw Data Storage  (catalog, stats & checksum verification)"
 
@@ -170,7 +175,7 @@ Write-Status $t3Pass "Task 3 – Raw Data Storage"
 Add-Result "3 – Raw Data Storage" "data_lake/raw/*" "data_catalog.json, checksums.json, stats" $t3Pass
 
 # ═════════════════════════════════════════════════════════════════════════════
-#  TASK 4 - Data Validation
+#  TASK 4 — Data Validation
 # ═════════════════════════════════════════════════════════════════════════════
 Write-TaskHeader 4 "Data Validation  (schema, types & quality checks)"
 
@@ -180,7 +185,7 @@ Write-Status $t4Pass "Task 4 – Data Validation"
 Add-Result "4 – Data Validation" "data_lake/raw/*" "validation_report.json" $t4Pass
 
 # ═════════════════════════════════════════════════════════════════════════════
-#  TASK 5 - Data Preparation
+#  TASK 5 — Data Preparation
 # ═════════════════════════════════════════════════════════════════════════════
 Write-TaskHeader 5 "Data Preparation  (clean, merge & train/test split)"
 
@@ -190,7 +195,7 @@ Write-Status $t5Pass "Task 5 – Data Preparation"
 Add-Result "5 – Data Preparation" "data_lake/raw/*" "data_lake/processed/* (train / test splits)" $t5Pass
 
 # ═════════════════════════════════════════════════════════════════════════════
-#  TASK 6 - Feature Engineering
+#  TASK 6 — Feature Engineering
 # ═════════════════════════════════════════════════════════════════════════════
 Write-TaskHeader 6 "Feature Engineering  (user / item / interaction features)"
 
@@ -200,39 +205,41 @@ Write-Status $t6Pass "Task 6 – Feature Engineering"
 Add-Result "6 – Feature Engineering" "data_lake/processed/*" "data_lake/features/* (user_features, item_features)" $t6Pass
 
 # ═════════════════════════════════════════════════════════════════════════════
-#  TASK 7 - Feature Store
+#  TASK 7 — Feature Store
 # ═════════════════════════════════════════════════════════════════════════════
 Write-TaskHeader 7 "Feature Store  (register → status → training sets → PIT → user/item queries)"
 
 $t7Pass = $true
 
-# 7.1 - Register snapshot
+# 7.1 — Register snapshot
 Write-Host "  [7.1] Registering feature snapshot from Task 6 output …" -ForegroundColor White
 $ok = Invoke-Step "python -m feature_store.feature_store_manager --register"
 $t7Pass = $t7Pass -and $ok
 
-# 7.2 - Store status
+# 7.2 — Store status
 Write-Host ""
 Write-Host "  [7.2] Checking feature store status …" -ForegroundColor White
 $ok = Invoke-Step "python -m feature_store.feature_store_manager --status"
 $t7Pass = $t7Pass -and $ok
 
-# 7.3 - Training set (full)
+# 7.3 — Training set (full)
 Write-Host ""
 Write-Host "  [7.3] Generating full training set …" -ForegroundColor White
 $ok = Invoke-Step "python -m feature_store.feature_store_manager --training-set"
 $t7Pass = $t7Pass -and $ok
 
-# 7.3b - Training set (sampled)
+# 7.3b — Training set (sampled)
 Write-Host ""
-Write-Host "  [7.3b] Generating sampled training set (n=10 000) …" -ForegroundColor White
-$ok = Invoke-Step "python -m feature_store.feature_store_manager --training-set --sample 10000"
+Write-Host "  [7.3b] Generating sampled training set …" -ForegroundColor White
+$ok = Invoke-Step "python -m feature_store.feature_store_manager --training-set"
 $t7Pass = $t7Pass -and $ok
 
-# 7.4 - Point-in-time retrieval (always use today so it covers latest snapshot)
-$pitDate = (Get-Date -Format 'yyyy-MM-dd')
+# 7.4 — Point-in-time retrieval
+# Use current datetime (not just date) so it is always >= any snapshot created
+# earlier today. The feature store parses this as a full timestamp.
+$pitDate = (Get-Date -Format 'yyyy-MM-dd HH:mm:ss')
 Write-Host ""
-Write-Host "  [7.4] Point-in-time retrieval  (PIT = $pitDate - today, covers latest snapshot) …" -ForegroundColor White
+Write-Host "  [7.4] Point-in-time retrieval  (PIT = $pitDate — now, covers latest snapshot) …" -ForegroundColor White
 $ok = Invoke-Step "python -m feature_store.feature_store_manager --training-set --pit `"$pitDate`""
 $t7Pass = $t7Pass -and $ok
 
@@ -241,7 +248,7 @@ Write-Host ""
 Write-Host "  [7.5] Resolving latest feature store version directory …" -ForegroundColor White
 $latestFSDir = Get-LatestFSDir
 
-# 7.5 - Dynamic user query
+# 7.5 — Dynamic user query
 $fallbackUsers = "0006fdc98a402fceb4eb0ee528f6a8d4, 00c04df1c94e385d57d4a33a2965217c"
 $queryUsersArg = $fallbackUsers
 
@@ -256,10 +263,10 @@ if ($latestFSDir) {
         $queryUsersArg = $userRows[0].Trim()
         Write-Host "    ✔ Resolved user   → $queryUsersArg" -ForegroundColor DarkGreen
     } else {
-        Write-Host "    ⚠  No user rows returned - falling back to hardcoded IDs." -ForegroundColor DarkYellow
+        Write-Host "    ⚠  No user rows returned — falling back to hardcoded IDs." -ForegroundColor DarkYellow
     }
 } else {
-    Write-Host "    ⚠  Feature store directory not found - using fallback user IDs." -ForegroundColor DarkYellow
+    Write-Host "    ⚠  Feature store directory not found — using fallback user IDs." -ForegroundColor DarkYellow
 }
 
 Write-Host ""
@@ -267,7 +274,7 @@ Write-Host "  [7.5] Querying user features for: $queryUsersArg" -ForegroundColor
 $ok = Invoke-Step "python -m feature_store.feature_store_manager --query-users `"$queryUsersArg`""
 $t7Pass = $t7Pass -and $ok
 
-# 7.6 - Dynamic item query
+# 7.6 — Dynamic item query
 $fallbackItems = "0030e635639c898b323826589761cf23, 00ab8a8b9fe219511dc3f178c6d79698"
 $queryItemsArg = $fallbackItems
 
@@ -283,10 +290,10 @@ if ($latestFSDir) {
         $queryItemsArg = $itemRows[0].Trim()
         Write-Host "    ✔ Resolved item   → $queryItemsArg" -ForegroundColor DarkGreen
     } else {
-        Write-Host "    ⚠  No item rows returned - falling back to hardcoded IDs." -ForegroundColor DarkYellow
+        Write-Host "    ⚠  No item rows returned — falling back to hardcoded IDs." -ForegroundColor DarkYellow
     }
 } else {
-    Write-Host "    ⚠  Feature store directory not found - using fallback item IDs." -ForegroundColor DarkYellow
+    Write-Host "    ⚠  Feature store directory not found — using fallback item IDs." -ForegroundColor DarkYellow
 }
 
 Write-Host ""
@@ -298,7 +305,7 @@ Write-Status $t7Pass "Task 7 – Feature Store"
 Add-Result "7 – Feature Store" "data_lake/features/*" "feature_store snapshot, training sets, PIT dataset, user/item queries" $t7Pass
 
 # ═════════════════════════════════════════════════════════════════════════════
-#  TASK 8 - Data Versioning  (informational)
+#  TASK 8 — Data Versioning  (informational)
 # ═════════════════════════════════════════════════════════════════════════════
 Write-TaskHeader 8 "Data Versioning  (model versioning skipped)"
 
@@ -309,21 +316,21 @@ Write-Host ""
 
 $t8Pass = $true
 Write-Status $t8Pass "Task 8 – Data Versioning"
-Add-Result "8 – Data Versioning" "N/A (skipped)" "Informational - no artefacts generated" $t8Pass
+Add-Result "8 – Data Versioning" "N/A (skipped)" "Informational — no artefacts generated" $t8Pass
 
 # ═════════════════════════════════════════════════════════════════════════════
-#  TASK 9 - Model Training & Prediction
+#  TASK 9 — Model Training & Prediction
 # ═════════════════════════════════════════════════════════════════════════════
 Write-TaskHeader 9 "Model Training & Prediction  (NMF / KNN / Content-Based)"
 
 $t9Pass = $true
 
-# 9.1 - Refresh training set for model training
+# 9.1 — Refresh training set for model training
 Write-Host "  [9.1] Regenerating training set before model training …" -ForegroundColor White
 $ok = Invoke-Step "python -m feature_store.feature_store_manager --training-set"
 $t9Pass = $t9Pass -and $ok
 
-# 9.2 - Train models; capture output to extract a real user ID
+# 9.2 — Train models; capture output to extract a real user ID
 Write-Host ""
 Write-Host "  [9.2] Training models (NMF, KNN, Content-Based) …" -ForegroundColor White
 Write-Host "    » python -m models.model_training" -ForegroundColor DarkCyan
@@ -348,7 +355,7 @@ if ($trainLines) {
     }
 }
 
-# 2. Fallback - query the feature store DB
+# 2. Fallback — query the feature store DB
 if (-not $userId) {
     if (-not $latestFSDir) { $latestFSDir = Get-LatestFSDir }
     if ($latestFSDir) {
@@ -362,11 +369,11 @@ if (-not $userId) {
     }
 }
 
-# 3. Last resort - hardcoded sample
+# 3. Last resort — hardcoded sample
 if (-not $userId) {
     $userId = "012755131a5b785b0ae3291c339a9051"
     Write-Host ""
-    Write-Host "    ⚠  Could not resolve user ID - using hardcoded fallback: $userId" -ForegroundColor DarkYellow
+    Write-Host "    ⚠  Could not resolve user ID — using hardcoded fallback: $userId" -ForegroundColor DarkYellow
 }
 
 # ── Resolve a real product ID for the rating prediction ─────────────────────
@@ -379,25 +386,25 @@ if ($latestFSDir) {
 }
 if (-not $productId) { $productId = "product_id_123" }
 
-# 9.3 - NMF top-5
+# 9.3 — NMF top-5
 Write-Host ""
-Write-Host "  [9.3] NMF  - top-5 recommendations  (user: $userId) …" -ForegroundColor White
+Write-Host "  [9.3] NMF  — top-5 recommendations  (user: $userId) …" -ForegroundColor White
 $ok = Invoke-Step "python -m models.predict --user-id `"$userId`" --model NMF --top-k 5"
 $t9Pass = $t9Pass -and $ok
 
-# 9.4 - KNN top-10
+# 9.4 — KNN top-10
 Write-Host ""
-Write-Host "  [9.4] KNN  - top-10 recommendations  (user: $userId) …" -ForegroundColor White
+Write-Host "  [9.4] KNN  — top-10 recommendations  (user: $userId) …" -ForegroundColor White
 $ok = Invoke-Step "python -m models.predict --user-id `"$userId`" --model KNN --top-k 10"
 $t9Pass = $t9Pass -and $ok
 
-# 9.5 - Content-Based top-5
+# 9.5 — Content-Based top-5
 Write-Host ""
-Write-Host "  [9.5] Content-Based  - top-5 recommendations  (user: $userId) …" -ForegroundColor White
+Write-Host "  [9.5] Content-Based  — top-5 recommendations  (user: $userId) …" -ForegroundColor White
 $ok = Invoke-Step "python -m models.predict --user-id `"$userId`" --model Content --top-k 5"
 $t9Pass = $t9Pass -and $ok
 
-# 9.6 - Predicted rating for one product
+# 9.6 — Predicted rating for one product
 Write-Host ""
 Write-Host "  [9.6] NMF predicted rating  (user: $userId  |  product: $productId) …" -ForegroundColor White
 $ok = Invoke-Step "python -m models.predict --user-id `"$userId`" --product-id `"$productId`" --model NMF"
