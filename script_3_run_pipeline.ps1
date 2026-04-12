@@ -79,13 +79,15 @@ function Get-LatestFSDir {
 }
 
 function Query-SQLite {
-    <#  Run a sqlite3 query and return the result rows as an array of strings  #>
+    <#  Run a sqlite3 query and return the result rows as an array of strings.
+        The leading comma (,) forces PowerShell to preserve the array wrapper
+        even when the result contains only one item.                          #>
     param([string]$DbPath, [string]$Query)
     try {
         $rows = sqlite3 $DbPath $Query 2>$null
-        return @($rows | Where-Object { $_ -ne "" })
+        return ,@($rows | Where-Object { $_ -ne "" })
     } catch {
-        return @()
+        return ,@()
     }
 }
 
@@ -230,8 +232,8 @@ $t7Pass = $t7Pass -and $ok
 
 # 7.3b — Training set (sampled)
 Write-Host ""
-Write-Host "  [7.3b] Generating sampled training set …" -ForegroundColor White
-$ok = Invoke-Step "python -m feature_store.feature_store_manager --training-set"
+Write-Host "  [7.3b] Generating sampled training set (n=10 000) …" -ForegroundColor White
+$ok = Invoke-Step "python -m feature_store.feature_store_manager --training-set --sample 10000"
 $t7Pass = $t7Pass -and $ok
 
 # 7.4 — Point-in-time retrieval
@@ -341,50 +343,74 @@ $trainLines | ForEach-Object { Write-Host "    $_" }
 $trainOk    = [bool]($trainEc -eq 0)
 $t9Pass     = $t9Pass -and $trainOk
 
-# ── Resolve a real user ID for predictions ──────────────────────────────────
-$userId = $null
+# ── Resolve a real user ID & product ID for predictions ─────────────────────
+# Priority: (1) latest training CSV  →  (2) feature store DB  →  (3) hardcoded
+$userId    = $null
+$productId = $null
 
-# 1. Try to scrape a 32-char hex customer ID from training stdout
-if ($trainLines) {
-    $blob  = $trainLines -join " "
-    $match = [regex]::Match($blob, '\b([0-9a-f]{32})\b')
-    if ($match.Success) {
-        $userId = $match.Groups[1].Value
-        Write-Host ""
-        Write-Host "    ✔ User ID extracted from training output  →  $userId" -ForegroundColor DarkGreen
+# 1. Read from the latest training CSV (same data the model was trained on)
+$latestCsv = Get-ChildItem "data_lake/serving/training_sets" `
+                 -Filter "training_set_*.csv" -ErrorAction SilentlyContinue |
+             Sort-Object Name | Select-Object -Last 1
+
+if ($latestCsv) {
+    Write-Host ""
+    Write-Host "    Reading IDs from training CSV: $($latestCsv.Name) …" -ForegroundColor DarkCyan
+    # Read header + first data line only for speed
+    $csvHead = Get-Content $latestCsv.FullName -TotalCount 2
+    if ($csvHead.Count -ge 2) {
+        $headers = $csvHead[0] -split ","
+        $values  = $csvHead[1] -split ","
+
+        $userCol = $headers | ForEach-Object { $_.Trim('"') } |
+                   Select-String -Pattern "customer_unique_id" | Select-Object -First 1
+        $itemCol = $headers | ForEach-Object { $_.Trim('"') } |
+                   Select-String -Pattern "product_id"         | Select-Object -First 1
+
+        if ($userCol) {
+            $idx = [Array]::IndexOf(($headers | ForEach-Object { $_.Trim('"') }), "customer_unique_id")
+            if ($idx -ge 0) { $userId = $values[$idx].Trim().Trim('"') }
+        }
+        if ($itemCol) {
+            $idx = [Array]::IndexOf(($headers | ForEach-Object { $_.Trim('"') }), "product_id")
+            if ($idx -ge 0) { $productId = $values[$idx].Trim().Trim('"') }
+        }
     }
+    if ($userId)    { Write-Host "    ✔ User ID from training CSV    →  $userId"    -ForegroundColor DarkGreen }
+    if ($productId) { Write-Host "    ✔ Product ID from training CSV →  $productId" -ForegroundColor DarkGreen }
 }
 
 # 2. Fallback — query the feature store DB
-if (-not $userId) {
+if (-not $userId -or -not $productId) {
     if (-not $latestFSDir) { $latestFSDir = Get-LatestFSDir }
     if ($latestFSDir) {
         $fsDb9 = Join-Path $latestFSDir "features.db"
-        $fsU   = Query-SQLite $fsDb9 "SELECT DISTINCT customer_unique_id FROM user_features LIMIT 1;"
-        if ($fsU.Count -gt 0) {
-            $userId = $fsU[0].Trim()
-            Write-Host ""
-            Write-Host "    ✔ Fallback user ID from feature store  →  $userId" -ForegroundColor DarkYellow
+        if (-not $userId) {
+            $fsU = @(Query-SQLite $fsDb9 "SELECT DISTINCT customer_unique_id FROM user_features LIMIT 1;")
+            if ($fsU.Count -gt 0) {
+                $userId = $fsU[0].Trim()
+                Write-Host "    ✔ User ID from feature store DB →  $userId" -ForegroundColor DarkYellow
+            }
+        }
+        if (-not $productId) {
+            $fsP = @(Query-SQLite $fsDb9 "SELECT DISTINCT product_id FROM item_features LIMIT 1;")
+            if ($fsP.Count -gt 0) {
+                $productId = $fsP[0].Trim()
+                Write-Host "    ✔ Product ID from feature store →  $productId" -ForegroundColor DarkYellow
+            }
         }
     }
 }
 
-# 3. Last resort — hardcoded sample
+# 3. Last resort — hardcoded
 if (-not $userId) {
     $userId = "012755131a5b785b0ae3291c339a9051"
-    Write-Host ""
     Write-Host "    ⚠  Could not resolve user ID — using hardcoded fallback: $userId" -ForegroundColor DarkYellow
 }
-
-# ── Resolve a real product ID for the rating prediction ─────────────────────
-$productId = $null
-if (-not $latestFSDir) { $latestFSDir = Get-LatestFSDir }
-if ($latestFSDir) {
-    $fsDb9b = Join-Path $latestFSDir "features.db"
-    $fsP    = Query-SQLite $fsDb9b "SELECT DISTINCT product_id FROM item_features LIMIT 1;"
-    if ($fsP.Count -gt 0) { $productId = $fsP[0].Trim() }
+if (-not $productId) {
+    $productId = "product_id_123"
+    Write-Host "    ⚠  Could not resolve product ID — using hardcoded fallback: $productId" -ForegroundColor DarkYellow
 }
-if (-not $productId) { $productId = "product_id_123" }
 
 # 9.3 — NMF top-5
 Write-Host ""
@@ -443,8 +469,8 @@ foreach ($r in $Results) {
 
 Write-Host $sep -ForegroundColor DarkGray
 
-$passCount = ($Results | Where-Object { $_.Status -match "PASS" }).Count
-$failCount = ($Results | Where-Object { $_.Status -match "FAIL" }).Count
+$passCount = @($Results | Where-Object { $_.Status -match "PASS" }).Count
+$failCount = @($Results | Where-Object { $_.Status -match "FAIL" }).Count
 
 Write-Host ""
 Write-Host ("  Completed  │  {0} / {1} tasks PASSED   │   {2} FAILED" -f $passCount, $Results.Count, $failCount) -ForegroundColor White
