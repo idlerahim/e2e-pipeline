@@ -8,8 +8,8 @@ This document describes the data versioning and lineage tracking workflow implem
 
 The repository tracks raw and transformed data with DVC at the top level using these files:
 
-- `dataset.dvc` — tracks the `dataset/` directory containing raw external datasets.
-- `data_lake.dvc` — tracks the `data_lake/` directory containing raw ingestion output, prepared data, feature data, and serving artifacts.
+- `dataset.dvc` - tracks the `dataset/` directory containing raw external datasets.
+- `data_lake.dvc` - tracks the `data_lake/` directory containing raw ingestion output, prepared data, feature data, and serving artifacts.
 
 The tracked directory layout is:
 

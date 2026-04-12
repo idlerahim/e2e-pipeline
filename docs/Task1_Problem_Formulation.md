@@ -436,8 +436,8 @@ flowchart LR
 
 ## 8. Conclusion
 
-This report defines the problem formulation for RecoMart's **end-to-end data management pipeline for a product recommendation system**. The dataset comprises 9 interconnected sources covering customers, products, orders, items, reviews, payments, sellers, and geolocation — providing a rich foundation for building both collaborative and content-based recommendation models.
+This report defines the problem formulation for RecoMart's **end-to-end data management pipeline for a product recommendation system**. The dataset comprises 9 interconnected sources covering customers, products, orders, items, reviews, payments, sellers, and geolocation - providing a rich foundation for building both collaborative and content-based recommendation models.
 
-The pipeline will be designed as a modular, automated system that ensures data freshness, quality, and structural integrity at every stage — from ingestion through to model serving and evaluation.
+The pipeline will be designed as a modular, automated system that ensures data freshness, quality, and structural integrity at every stage - from ingestion through to model serving and evaluation.
 
 ---

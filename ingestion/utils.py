@@ -1,6 +1,6 @@
 """
 ============================================================
-RecoMart Data Pipeline — Utility Functions
+RecoMart Data Pipeline - Utility Functions
 ============================================================
 Shared helpers for configuration loading, logging setup,
 directory creation, and metadata generation.

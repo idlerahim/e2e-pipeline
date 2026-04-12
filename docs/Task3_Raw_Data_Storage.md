@@ -25,20 +25,20 @@ python -m storage.storage_manager --verify --tree
 
 ## What It Does
 
-1. **Initializes data lake skeleton** — creates all 4 layers if they don't exist:
+1. **Initializes data lake skeleton** - creates all 4 layers if they don't exist:
 
-   - `data_lake/raw/` — unprocessed ingested data
-   - `data_lake/staging/` — post-validation (used by Task 4)
-   - `data_lake/curated/` — transformed features (used by Tasks 5–6)
-   - `data_lake/serving/` — model-ready data (used by Task 7)
-2. **Builds file catalog** — walks the raw layer, records every file with:
+   - `data_lake/raw/` - unprocessed ingested data
+   - `data_lake/staging/` - post-validation (used by Task 4)
+   - `data_lake/curated/` - transformed features (used by Tasks 5–6)
+   - `data_lake/serving/` - model-ready data (used by Task 7)
+2. **Builds file catalog** - walks the raw layer, records every file with:
 
    - Source name, data type, partition date
    - File size (bytes + human-readable)
    - Linked metadata from `.meta.json` sidecars
-3. **Computes storage statistics** — total files, sizes, sources, partitions
-4. **Verifies checksums** (`--verify`) — recomputes MD5 for each data file and compares against the checksum stored in its `.meta.json`
-5. **Prints tree view** (`--tree`) — visual directory tree of the entire data lake
+3. **Computes storage statistics** - total files, sizes, sources, partitions
+4. **Verifies checksums** (`--verify`) - recomputes MD5 for each data file and compares against the checksum stored in its `.meta.json`
+5. **Prints tree view** (`--tree`) - visual directory tree of the entire data lake
 
 ## Output
 

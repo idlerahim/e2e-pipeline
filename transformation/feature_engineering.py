@@ -3,11 +3,11 @@
 RecoMart - Feature Engineering & Transformation (Task 6)
 ============================================================
 Builds engineered features for the recommendation model:
-  • User-level features  (purchase behavior, preferences)
-  • Item-level features  (popularity, ratings, one-hot categories)
-  • Interaction features (enhanced user-item pairs)
-  • Applies: normalization, log transforms, one-hot encoding
-  • Stores results as CSV + SQLite database
+  - User-level features  (purchase behavior, preferences)
+  - Item-level features  (popularity, ratings, one-hot categories)
+  - Interaction features (enhanced user-item pairs)
+  - Applies: normalization, log transforms, one-hot encoding
+  - Stores results as CSV + SQLite database
 
 Usage:
     python -m transformation.feature_engineering
@@ -207,7 +207,7 @@ def build_feature_registry() -> list:
         ("avg_price", "item_features", "numeric", "mean", "Mean selling price (BRL)", "price"),
         ("total_revenue", "item_features", "numeric", "sum", "Total revenue generated", "price"),
         ("distinct_buyers", "item_features", "numeric", "nunique", "Number of unique buyers", "customer_unique_id"),
-        ("product_volume_cm3", "item_features", "numeric", "derived (L×H×W)", "Product volume in cm³", "product_length/height/width_cm"),
+        ("product_volume_cm3", "item_features", "numeric", "derived (LxHxW)", "Product volume in cm3", "product_length/height/width_cm"),
         ("popularity_rank", "item_features", "numeric", "rank", "Rank by total_sold (1 = most popular)", "total_sold"),
         ("price_percentile", "item_features", "numeric", "rank(pct)", "Price percentile [0,1]", "avg_price"),
         ("price_normalized", "item_features", "numeric", "min-max [0,1]", "Normalized average price", "avg_price"),
@@ -219,7 +219,7 @@ def build_feature_registry() -> list:
         ("purchase_count", "interaction_features", "numeric", "count", "Times user bought this item", "order_id"),
         ("implicit_signal", "interaction_features", "binary", "flag", "1 if purchased, 0 otherwise", "order_id"),
         ("rating_normalized", "interaction_features", "numeric", "min-max [0,1]", "Normalized rating", "rating"),
-        ("user_item_affinity", "interaction_features", "numeric", "weighted (0.6×rating + 0.4×freq)", "Composite affinity score", "rating, purchase_count"),
+        ("user_item_affinity", "interaction_features", "numeric", "weighted (0.6xrating + 0.4xfreq)", "Composite affinity score", "rating, purchase_count"),
     ]
     return [
         {"feature_name": r[0], "feature_table": r[1], "feature_type": r[2],
@@ -327,7 +327,7 @@ def generate_feature_summary(registry: list, uf: pd.DataFrame, itf: pd.DataFrame
         "| **One-Hot Encoding** | Binary 0/1 for each category | Top 10 categories + 'other' |",
         "| **Rank** | Ascending/descending integer rank | popularity_rank, price_percentile |",
         "| **Recency** | `max_date - last_purchase_date` in days | recency_days |",
-        "| **Composite Score** | `0.6 × rating_norm + 0.4 × freq_norm` | user_item_affinity |",
+        "| **Composite Score** | `0.6 x rating_norm + 0.4 x freq_norm` | user_item_affinity |",
         "",
     ]
 
@@ -429,9 +429,9 @@ def run_feature_engineering(config_path: str = None):
 
     logger.info("=" * 70)
     logger.info("FEATURE ENGINEERING - COMPLETE")
-    logger.info(f"  User features        : {len(uf):,} rows × {len(uf.columns)} cols")
-    logger.info(f"  Item features        : {len(itf):,} rows × {len(itf.columns)} cols")
-    logger.info(f"  Interaction features : {len(inf):,} rows × {len(inf.columns)} cols")
+    logger.info(f"  User features        : {len(uf):,} rows x {len(uf.columns)} cols")
+    logger.info(f"  Item features        : {len(itf):,} rows x {len(itf.columns)} cols")
+    logger.info(f"  Interaction features : {len(inf):,} rows x {len(inf.columns)} cols")
     logger.info(f"  SQLite DB            : {db_path}")
     logger.info("=" * 70)
 

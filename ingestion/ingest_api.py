@@ -1,17 +1,17 @@
 """
 ============================================================
-RecoMart Data Pipeline — REST API Ingestion Script
+RecoMart Data Pipeline - REST API Ingestion Script
 ============================================================
 Demonstrates ingesting product data from a REST API
 (https://fakestoreapi.com) into the data-lake raw layer.
 
 Features:
-  • Configurable endpoint list from YAML config
-  • Exponential-backoff retry with configurable max retries
-  • Request timeout support
-  • JSON response → CSV conversion for downstream compatibility
-  • Checksum + metadata sidecar for every ingested file
-  • Rotating-file + console logging for full audit trail
+  - Configurable endpoint list from YAML config
+  - Exponential-backoff retry with configurable max retries
+  - Request timeout support
+  - JSON response -> CSV conversion for downstream compatibility
+  - Checksum + metadata sidecar for every ingested file
+  - Rotating-file + console logging for full audit trail
 
 Usage:
     python -m ingestion.ingest_api
@@ -97,7 +97,7 @@ def fetch_with_retry(
             if logger:
                 logger.warning(
                     f"  Attempt {attempt} failed: {exc}"
-                    + (f" — retrying in {delay:.1f}s" if attempt < max_retries else " — no more retries")
+                    + (f" - retrying in {delay:.1f}s" if attempt < max_retries else " - no more retries")
                 )
             if attempt < max_retries:
                 time.sleep(delay)
@@ -157,10 +157,10 @@ def ingest_api_endpoint(
 
     # --- 3. Normalize to DataFrame ------------------------
     if isinstance(data, list) and len(data) > 0 and isinstance(data[0], dict):
-        # List of objects → flatten nested keys
+        # List of objects -> flatten nested keys
         df = pd.json_normalize(data)
     elif isinstance(data, dict):
-        # Single object — wrap in list and normalize
+        # Single object - wrap in list and normalize
         df = pd.json_normalize([data])
     elif isinstance(data, list):
         # Scalar list (e.g. categories endpoint returns ["electronics", ...])

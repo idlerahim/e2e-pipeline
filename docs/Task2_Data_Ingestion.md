@@ -65,7 +65,7 @@ python run_ingestion.py --mode api
    - Converts JSON → CSV using pandas
    - Stores in partitioned data lake: `data_lake/raw/<source>/api/<date>/`
    - Computes MD5 checksum + writes `.meta.json`
-3. **Error handling**: Each file/endpoint has its own try/catch — one failure won't stop the rest.
+3. **Error handling**: Each file/endpoint has its own try/catch - one failure won't stop the rest.
 
 ## Output
 

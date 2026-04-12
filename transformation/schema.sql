@@ -1,5 +1,5 @@
 -- ============================================================
--- RecoMart Feature Store — SQL Schema (Task 6)
+-- RecoMart Feature Store - SQL Schema (Task 6)
 -- ============================================================
 -- Database: SQLite (features.db)
 -- Purpose:  Store engineered features for the recommendation

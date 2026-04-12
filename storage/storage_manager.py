@@ -1,6 +1,6 @@
 """
 ============================================================
-RecoMart Data Pipeline — Data Lake Storage Manager
+RecoMart Data Pipeline - Data Lake Storage Manager
 ============================================================
 Utilities for inspecting, cataloging, and managing the local
 data lake.  Provides a single-command audit of every file
@@ -8,9 +8,9 @@ stored in the raw layer, including metadata, sizes, and
 partition details.
 
 Deliverables for Task 3:
-  • Programmatic creation of the data lake folder hierarchy
-  • Catalog / manifest generation for all stored assets
-  • Storage statistics (files, sizes, partitions)
+  - Programmatic creation of the data lake folder hierarchy
+  - Catalog / manifest generation for all stored assets
+  - Storage statistics (files, sizes, partitions)
 
 Usage:
     python -m storage.storage_manager                # Generate catalog
@@ -56,10 +56,10 @@ def initialize_data_lake(cfg: dict, logger) -> dict:
 
     Creates the following hierarchy under ``data_lake_root``:
         data_lake/
-        ├── raw/
-        ├── staging/
-        ├── curated/
-        └── serving/
+        - raw/
+        - staging/
+        - curated/
+        - serving/
 
     Each layer is created even if no data exists yet, so the
     structure is ready for downstream pipeline stages.
@@ -67,7 +67,7 @@ def initialize_data_lake(cfg: dict, logger) -> dict:
     Returns
     -------
     dict
-        Mapping of layer name → absolute path.
+        Mapping of layer name -> absolute path.
     """
     project_root = get_project_root()
     lake_root = os.path.join(project_root, cfg["paths"]["data_lake_root"])
@@ -164,7 +164,7 @@ def verify_checksums(catalog: list, logger) -> dict:
     """
     results = {"verified": 0, "mismatched": 0, "skipped": 0, "details": []}
 
-    # Build a map: data_file_basename → expected checksum
+    # Build a map: data_file_basename -> expected checksum
     # Use basename matching to avoid path separator issues
     meta_map = {}
     for entry in catalog:
@@ -217,13 +217,13 @@ def print_tree(root_path: str, prefix: str = "", max_depth: int = 4, _depth: int
     files = [e for e in entries if os.path.isfile(os.path.join(root_path, e))]
 
     for i, d in enumerate(dirs):
-        connector = "└── " if (i == len(dirs) - 1 and not files) else "├── "
+        connector = "+-- " if (i == len(dirs) - 1 and not files) else "|-- "
         print(f"{prefix}{connector}{d}/")
-        extension = "    " if connector == "└── " else "│   "
+        extension = "    " if connector == "+-- " else "|   "
         print_tree(os.path.join(root_path, d), prefix + extension, max_depth, _depth + 1)
 
     for i, f in enumerate(files):
-        connector = "└── " if i == len(files) - 1 else "├── "
+        connector = "+-- " if i == len(files) - 1 else "|-- "
         size = _human_size(os.path.getsize(os.path.join(root_path, f)))
         print(f"{prefix}{connector}{f}  ({size})")
 
@@ -287,7 +287,7 @@ def main():
     project_root = get_project_root()
 
     print("=" * 70)
-    print("  RecoMart — Data Lake Storage Manager")
+    print("  RecoMart - Data Lake Storage Manager")
     print("=" * 70)
 
     # 1. Initialize / ensure all layers exist

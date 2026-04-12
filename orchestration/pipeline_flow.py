@@ -249,7 +249,7 @@ def rocomart_data_pipeline(config_path: str | None = None):
     ]
 
     report_path = generate_pipeline_report(stage_results)
-    logger.info(f"📄 Pipeline report saved to: {report_path}")
+    logger.info(f"Pipeline report saved to: {report_path}")
 
     critical_failures = [
         r for r in stage_results if r["stage"] != "Model Training" and r["status"] != "SUCCESS"
@@ -259,7 +259,7 @@ def rocomart_data_pipeline(config_path: str | None = None):
         logger.error("One or more critical pipeline stages failed.")
         raise RuntimeError("Critical pipeline stages failed. See report and logs for details.")
 
-    logger.info("🎉 RocoMart Data Pipeline completed successfully!")
+    logger.info("RocoMart Data Pipeline completed successfully!")
     return {
         "status": "SUCCESS",
         "report": report_path,

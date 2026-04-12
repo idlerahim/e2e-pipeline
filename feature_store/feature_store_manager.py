@@ -1,18 +1,18 @@
 """
 ============================================================
-RecoMart — Lightweight Feature Store (Task 7)
+RecoMart - Lightweight Feature Store (Task 7)
 ============================================================
 Custom lightweight feature store supporting:
-  • Feature versioning (snapshot-based)
-  • Point-in-time correctness (timestamp-partitioned)
-  • Retrieval for training and inference
+  - Feature versioning (snapshot-based)
+  - Point-in-time correctness (timestamp-partitioned)
+  - Retrieval for training and inference
 
 Architecture:
-  • SQLite backend for feature tables
-  • Snapshot versioning (each run = new version)
-  • Feature registry with metadata
-  • Point-in-time retrieval via snapshot timestamps
-  • Training/inference APIs
+  - SQLite backend for feature tables
+  - Snapshot versioning (each run = new version)
+  - Feature registry with metadata
+  - Point-in-time retrieval via snapshot timestamps
+  - Training/inference APIs
 
 Usage:
     python -m feature_store.feature_store_manager --register
@@ -93,7 +93,7 @@ class FeatureStoreManager:
         Register a new feature snapshot from the curated features DB.
 
         Creates a versioned copy in the feature store with a timestamp.
-        This supports feature versioning — each run produces a new snapshot.
+        This supports feature versioning - each run produces a new snapshot.
         """
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         snapshot_id = f"v_{timestamp}"
@@ -184,7 +184,7 @@ class FeatureStoreManager:
         """
         Get the latest snapshot that was created at or before `target_time`.
 
-        This supports point-in-time correctness — you can retrieve features
+        This supports point-in-time correctness - you can retrieve features
         as they were at a specific point in time, avoiding data leakage.
         """
         target_dt = datetime.fromisoformat(target_time)
@@ -256,7 +256,7 @@ class FeatureStoreManager:
         df = pd.read_sql(query, conn)
         conn.close()
 
-        self.logger.info(f"  Training set: {len(df)} rows × {len(df.columns)} features")
+        self.logger.info(f"  Training set: {len(df)} rows x {len(df.columns)} features")
         return df
 
     # ----------------------------------------------------------
@@ -300,7 +300,7 @@ class FeatureStoreManager:
     def print_status(self):
         """Print feature store status summary."""
         print("=" * 70)
-        print("  RecoMart Feature Store — Status")
+        print("  RecoMart Feature Store - Status")
         print("=" * 70)
         print(f"  Store location : {self.store_dir}")
         print(f"  Created        : {self.registry.get('created_at', 'N/A')}")
@@ -367,7 +367,7 @@ def main():
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         out_path = os.path.join(out_dir, f"training_set_{ts}.csv")
         df.to_csv(out_path, index=False)
-        print(f"\n[OK] Training set saved: {out_path} ({len(df)} rows × {len(df.columns)} features)")
+        print(f"\n[OK] Training set saved: {out_path} ({len(df)} rows x {len(df.columns)} features)")
 
     if args.query_users:
         user_ids = [uid.strip() for uid in args.query_users.split(",")]

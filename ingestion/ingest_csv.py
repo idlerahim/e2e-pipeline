@@ -1,17 +1,17 @@
 """
 ============================================================
-RecoMart Data Pipeline — CSV Batch Ingestion Script
+RecoMart Data Pipeline - CSV Batch Ingestion Script
 ============================================================
 Ingests CSV data files from the local ``dataset/`` directory
 into a structured data-lake layout partitioned by
     source  /  type  /  date
 
 Features:
-  • Automated discovery of configured source files
-  • Checksum-based change detection (skip unchanged files)
-  • Robust error handling with per-file try/catch
-  • Rotating-file + console logging for full audit trail
-  • JSON metadata sidecar for every ingested file
+  - Automated discovery of configured source files
+  - Checksum-based change detection (skip unchanged files)
+  - Robust error handling with per-file try/catch
+  - Rotating-file + console logging for full audit trail
+  - JSON metadata sidecar for every ingested file
 
 Usage:
     python -m ingestion.ingest_csv

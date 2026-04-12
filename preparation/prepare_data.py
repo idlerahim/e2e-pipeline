@@ -1,6 +1,6 @@
 """
 ============================================================
-RecoMart Data Pipeline — Data Preparation & EDA (Task 5)
+RecoMart Data Pipeline - Data Preparation & EDA (Task 5)
 ============================================================
 Performs data cleaning, preprocessing, exploratory analysis,
 and outputs a prepared dataset ready for feature engineering.
@@ -198,7 +198,7 @@ def build_transactions(dfs: dict, logger) -> pd.DataFrame:
 
     # Start with orders + items
     txn = dfs["orders"].merge(dfs["order_items"], on="order_id", how="inner")
-    logger.info(f"    orders × items: {len(txn):,}")
+    logger.info(f"    orders x items: {len(txn):,}")
 
     # Add reviews
     txn = txn.merge(dfs["reviews"][["order_id", "review_score", "has_review_text"]],
@@ -225,7 +225,7 @@ def build_transactions(dfs: dict, logger) -> pd.DataFrame:
     txn["purchase_hour"] = txn["order_purchase_timestamp"].dt.hour
     txn["purchase_dayofweek"] = txn["order_purchase_timestamp"].dt.dayofweek
 
-    logger.info(f"    Final transaction dataset: {len(txn):,} rows × {len(txn.columns)} cols")
+    logger.info(f"    Final transaction dataset: {len(txn):,} rows x {len(txn.columns)} cols")
     return txn
 
 
@@ -338,7 +338,7 @@ def generate_eda_plots(txn: pd.DataFrame, interactions: pd.DataFrame,
     ax.set_yticks(range(7))
     ax.set_yticklabels(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])
     ax.set_xlabel("Hour of Day", fontsize=12)
-    ax.set_title("Purchase Heatmap: Day of Week × Hour", fontsize=14, fontweight="bold")
+    ax.set_title("Purchase Heatmap: Day of Week x Hour", fontsize=14, fontweight="bold")
     plt.colorbar(im, ax=ax, label="Order Count")
     plt.tight_layout()
     plt.savefig(os.path.join(plots_dir, "06_purchase_heatmap.png"), dpi=150)
