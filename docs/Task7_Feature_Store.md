@@ -12,10 +12,10 @@ python -m feature_store.feature_store_manager --status
 # 3. Generate a training set
 python -m feature_store.feature_store_manager --training-set
 # With sampling:
-python -m feature_store.feature_store_manager --training-set --sample 1000
+python -m feature_store.feature_store_manager --training-set --sample 10000
 
 # 4. Point-in-time retrieval (timestamp must be >= earliest snapshot)
-python -m feature_store.feature_store_manager --training-set --pit "2026-04-07T11:15:00"
+python -m feature_store.feature_store_manager --training-set --pit "2026-04-12"
 
 # 5.1 OPTIONAL: Dynamically get users using sqlite3
 # Install sqlite3 on Windows
@@ -25,10 +25,13 @@ winget install SQLite.SQLite
 sqlite3 "$((Get-ChildItem data_lake/serving/feature_store -Directory -Filter 'v_*' | Sort-Object Name | Select-Object -Last 1).FullName)\features.db" "SELECT DISTINCT customer_unique_id FROM user_features LIMIT 20;"
 
 # 5.2 Inference: query user features (use real customer_unique_id values)
-python -m feature_store.feature_store_manager --query-users "012755131a5b785b0ae3291c339a9051, 0387367daee04c9cbcf57eaee0d699c6"
+python -m feature_store.feature_store_manager --query-users "0006fdc98a402fceb4eb0ee528f6a8d4, 00c04df1c94e385d57d4a33a2965217c"
 
-# 6. Inference: query item features (use real product_id values)
-python -m feature_store.feature_store_manager --query-items "012755131a5b785b0ae3291c339a9051, 0387367daee04c9cbcf57eaee0d699c6"
+# 6.1 Get items dynamically from latest feature_store and place them in next command
+sqlite3 "$((Get-ChildItem data_lake/serving/feature_store -Directory -Filter 'v_*' | Sort-Object Name | Select-Object -Last 1).FullName)\features.db" "SELECT DISTINCT product_id FROM item_features LIMIT 20;"
+
+# 6.2 Inference: query item features (use real product_id values)
+python -m feature_store.feature_store_manager --query-items "0030e635639c898b323826589761cf23, 00ab8a8b9fe219511dc3f178c6d79698"
 ```
 
 ## Input

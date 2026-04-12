@@ -31,11 +31,12 @@ dvc pull
 ```
 
 ```bash
-# Run both CSV + API ingestion
-python run_ingestion.py
-
 # Run only CSV ingestion
 python run_ingestion.py --mode csv
+
+# Optional
+# Run both CSV + API ingestion
+python run_ingestion.py
 
 # Run only API ingestion
 python run_ingestion.py --mode api

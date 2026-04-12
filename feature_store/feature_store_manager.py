@@ -351,7 +351,7 @@ def main():
             print(f"ERROR: features.db not found at {db_path}")
             return
         snapshot_id = store.register_snapshot(db_path, features_dir)
-        print(f"\n✓ Snapshot registered: {snapshot_id}")
+        print(f"\n[OK] Snapshot registered: {snapshot_id}")
 
     if args.status:
         store.print_status()
@@ -367,7 +367,7 @@ def main():
         ts = datetime.now().strftime("%Y%m%d_%H%M%S")
         out_path = os.path.join(out_dir, f"training_set_{ts}.csv")
         df.to_csv(out_path, index=False)
-        print(f"\n✓ Training set saved: {out_path} ({len(df)} rows × {len(df.columns)} features)")
+        print(f"\n[OK] Training set saved: {out_path} ({len(df)} rows × {len(df.columns)} features)")
 
     if args.query_users:
         user_ids = [uid.strip() for uid in args.query_users.split(",")]

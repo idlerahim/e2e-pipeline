@@ -1,14 +1,14 @@
 """
 ============================================================
-RecoMart Data Pipeline — Data Profiling & Validation (Task 4)
+RecoMart Data Pipeline - Data Profiling & Validation (Task 4)
 ============================================================
 Automated validation checks on all raw ingested datasets:
-  • Missing values detection
-  • Duplicate entry detection
-  • Schema validation (expected columns & dtypes)
-  • Range / format checks (e.g. review_score ∈ [1,5])
-  • Data profiling (stats, distributions, cardinality)
-  • Generates a Data Quality Report (JSON + Markdown)
+  - Missing values detection
+  - Duplicate entry detection
+  - Schema validation (expected columns & dtypes)
+  - Range / format checks (e.g. review_score <is in> [1,5])
+  - Data profiling (stats, distributions, cardinality)
+  - Generates a Data Quality Report (JSON + Markdown)
 
 Usage:
     python -m validation.validate_data
@@ -278,7 +278,7 @@ def validate_dataset(filepath: str, filename: str, schema: dict, logger) -> dict
     df = pd.read_csv(filepath, low_memory=False)
     row_count = len(df)
     col_count = len(df.columns)
-    logger.info(f"  Shape: {row_count:,} rows × {col_count} columns")
+    logger.info(f"  Shape: {row_count:,} rows x {col_count} columns")
 
     report = OrderedDict()
     report["file"] = filename

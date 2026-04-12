@@ -1,6 +1,6 @@
 """
 ============================================================
-RecoMart Data Pipeline — Unified Ingestion Runner
+RecoMart Data Pipeline - Unified Ingestion Runner
 ============================================================
 Orchestrates both CSV batch ingestion and REST API ingestion
 in a single run.  Can also be used for periodic/scheduled
@@ -43,7 +43,7 @@ def main():
     args = parser.parse_args()
 
     print("=" * 70)
-    print("  RecoMart — Data Ingestion Pipeline")
+    print("  RecoMart - Data Ingestion Pipeline")
     print(f"  Mode: {args.mode.upper()}")
     print("=" * 70)
 

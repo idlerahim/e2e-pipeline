@@ -1,6 +1,6 @@
 """
 ============================================================
-RecoMart — Feature Engineering & Transformation (Task 6)
+RecoMart - Feature Engineering & Transformation (Task 6)
 ============================================================
 Builds engineered features for the recommendation model:
   • User-level features  (purchase behavior, preferences)
