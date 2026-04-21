@@ -99,32 +99,63 @@ $summary = @()
 foreach ($file in $allCsvFiles) {
     if ($file.Name -like "*$pattern*") {
         $origSize = $file.Length
-        $rows     = Import-Csv -Path $file.FullName
-        $origRows = $rows.Count
-        $origCols = if ($origRows -gt 0) { ($rows[0].PSObject.Properties | Measure-Object).Count } else { 0 }
 
-        $sampleCount = [math]::Max(1, [math]::Round($origRows * $ratio))
-        $sampled     = $rows | Get-Random -Count $sampleCount
+        if ($percentage -eq 100) {
+            # --- 100%: skip processing, just report original stats ---
+            # Read only the header + first data line to get column count
+            $reader   = [System.IO.StreamReader]::new($file.FullName)
+            $header   = $reader.ReadLine()
+            $reader.Close()
 
-        $sampled | Export-Csv -Path $file.FullName -NoTypeInformation -Encoding UTF8
+            $origCols = if ($header) { ($header -split ',').Count } else { 0 }
+            # Line count minus header = row count
+            $lineCount = 0
+            foreach ($line in [System.IO.File]::ReadLines($file.FullName)) { $lineCount++ }
+            $origRows = [math]::Max(0, $lineCount - 1)
 
-        $newSize = (Get-Item $file.FullName).Length
-        $newRows = $sampled.Count
-        $newCols = $origCols
+            Write-Host "  ✓ " -ForegroundColor Green -NoNewline
+            Write-Host $file.Name -NoNewline
+            Write-Host "  " -NoNewline
+            Write-Host "[100% - kept as-is]" -ForegroundColor DarkGreen
 
-        Write-Host "  ✓ " -ForegroundColor Green -NoNewline
-        Write-Host $file.Name -NoNewline
-        Write-Host "  " -NoNewline
-        Write-Host "[matched: '$pattern']" -ForegroundColor DarkGreen
+            $summary += [PSCustomObject]@{
+                "CSV File"  = $file.Name
+                "Orig Cols" = $origCols
+                "Orig Rows" = "{0:N0}" -f $origRows
+                "Orig Size" = Format-Size $origSize
+                "New Cols"  = $origCols
+                "New Rows"  = "{0:N0}" -f $origRows
+                "New Size"  = Format-Size $origSize
+            }
+        } else {
+            # --- < 100%: sample rows ---
+            $rows     = Import-Csv -Path $file.FullName
+            $origRows = $rows.Count
+            $origCols = if ($origRows -gt 0) { ($rows[0].PSObject.Properties | Measure-Object).Count } else { 0 }
 
-        $summary += [PSCustomObject]@{
-            "CSV File"  = $file.Name
-            "Orig Cols" = $origCols
-            "Orig Rows" = "{0:N0}" -f $origRows
-            "Orig Size" = Format-Size $origSize
-            "New Cols"  = $newCols
-            "New Rows"  = "{0:N0}" -f $newRows
-            "New Size"  = Format-Size $newSize
+            $sampleCount = [math]::Max(1, [math]::Round($origRows * $ratio))
+            $sampled     = $rows | Get-Random -Count $sampleCount
+
+            $sampled | Export-Csv -Path $file.FullName -NoTypeInformation -Encoding UTF8
+
+            $newSize = (Get-Item $file.FullName).Length
+            $newRows = $sampled.Count
+            $newCols = $origCols
+
+            Write-Host "  ✓ " -ForegroundColor Green -NoNewline
+            Write-Host $file.Name -NoNewline
+            Write-Host "  " -NoNewline
+            Write-Host "[matched: '$pattern']" -ForegroundColor DarkGreen
+
+            $summary += [PSCustomObject]@{
+                "CSV File"  = $file.Name
+                "Orig Cols" = $origCols
+                "Orig Rows" = "{0:N0}" -f $origRows
+                "Orig Size" = Format-Size $origSize
+                "New Cols"  = $newCols
+                "New Rows"  = "{0:N0}" -f $newRows
+                "New Size"  = Format-Size $newSize
+            }
         }
     } else {
         Write-Host "  - " -ForegroundColor DarkGray -NoNewline
