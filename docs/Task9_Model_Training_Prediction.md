@@ -21,7 +21,7 @@ python -m models.model_training
 This will:
 
 - Load the latest training set from `data_lake/serving/training_sets/`
-- Train all three models (Matrix Factorization, KNN, Content-Based)
+- Train the Category User-Based KNN model
 - Log metrics and artifacts to MLflow
 - Generate performance report at `reports/model_performance_report.md`
 
@@ -59,8 +59,8 @@ This task implements model training and evaluation for the RocoMart recommendati
 **Recommendation Strategy:**
 
 - Focus on collaborative filtering as the primary approach, since it leverages user-item interaction patterns effectively for e-commerce recommendations.
-- Use scikit-learn for collaborative filtering implementations: NMF for matrix factorization and KNN for item similarity.
-- Evaluate models using standard metrics: RMSE (Root Mean Square Error), MAE (Mean Absolute Error), and ranking metrics such as Precision@K, Recall@K, and NDCG@K.
+- Use scikit-learn for memory-based Category User-User collaborative filtering (KNN).
+- Evaluate models using standard ranking metrics such as Precision@K, Recall@K, and NDCG@K.
 - Track all experiments with MLflow to maintain reproducibility and compare model versions.
 
 **Data Sources:**
@@ -70,25 +70,17 @@ This task implements model training and evaluation for the RocoMart recommendati
 
 **Evaluation Approach:**
 
-- Train-validation split (80/20) with a held-out test set for evaluation
-- Compare models using rating prediction metrics (RMSE, MAE) and ranking metrics (Precision@K, Recall@K, NDCG@K)
+- Train-validation split with a held-out test set for evaluation
+- Compare models using ranking metrics (Precision@K, Recall@K, NDCG@K)
 
 ## Target Models
 
-We target three recommendation models:
+We target one primary recommendation model:
 
-1. **Matrix Factorization (NMF)** - Non-negative Matrix Factorization collaborative filtering
+1. **KNN (K-Nearest Neighbors)** - Memory-based Category User-User collaborative filtering
 
-   - Strengths: Handles sparse interactions, captures latent factors, meaningful non-negative embeddings
-   - Use case: General user-item recommendations
-2. **KNN (K-Nearest Neighbors)** - Item-based memory-based collaborative filtering
-
-   - Strengths: Interpretable, leverages item similarity, easy to extend
-   - Use case: Item similarity recommendations
-3. **Content-Based Filtering** - Using product features
-
-   - Strengths: Works with new users, uses item metadata
-   - Use case: Recommendations based on product descriptions/categories
+   - Strengths: Interpretable, leverages user affinity to specific product categories, handles zero-shot recommendations well across item spaces.
+   - Use case: Category-level personalized recommendations based on neighbor interactions.
 
 ## Implementation
 
@@ -97,31 +89,30 @@ We target three recommendation models:
 The training script `models/model_training.py` implements:
 
 - Data loading from the feature store (`data_lake/serving/training_sets/`)
-- Model training for all three targets using scikit-learn for collaborative filtering and content-based scoring
-- Evaluation with train/test split
+- Model training using scikit-learn's NearestNeighbors
+- Evaluation using Top-K ranking
 - MLflow tracking for parameters, metrics, and artifacts
 
 ### Model Performance Report
 
-See `reports/model_performance_report.md` for detailed evaluation results including RMSE, MAE, and ranking metrics such as Precision@K, Recall@K, NDCG@K, and MAP@K.
+See `reports/model_performance_report.md` for detailed evaluation results including ranking metrics such as Precision@K, Recall@K, and NDCG@K.
 
 ### MLflow Tracking
 
 Models are tracked with:
 
 - **Experiment**: `RocoMart_Recommendation_Models`
-- **Run IDs**: Each model gets a unique run (Matrix Factorization, KNN, Content-Based)
-- **Parameters**: Model hyperparameters (e.g., `n_components=20` for NMF, `k=40` for KNN, `max_features=1000` for TF-IDF)
+- **Run IDs**: `KNN_Collaborative_Filtering`
+- **Parameters**: Model hyperparameters (e.g., `k_value=10`, `min_categories=2`)
 - **Metrics**:
-  - Rating prediction: RMSE, MAE
-  - Ranking metrics: Precision@5, Precision@10, Recall@5, Recall@10, NDCG@5, NDCG@10, MAP@5, MAP@10
-- **Artifacts**: Serialized models, vectorizers, similarity matrices
+  - Ranking metrics: Precision_5, Recall_5, NDCG_5
+- **Artifacts**: Serialized model (`model/`) and the user_item_grid (`user_item_grid.csv`)
 
 #### View Experiment Metrics
 
 - **Launch MLflow UI**: `mlflow ui` → Navigate to http://localhost:5000
 - **Navigate to Experiment**: Click "RocoMart_Recommendation_Models" in the UI
-- **Compare Runs**: Select multiple runs to compare side-by-side (RMSE, Precision@10, etc.)
+- **Compare Runs**: Select multiple runs to compare side-by-side (Precision, NDCG, etc.)
 - **View Run Details**: Click individual run to see parameters, metrics, and logged artifacts
 
 #### MLflow Artifact Storage
@@ -134,11 +125,11 @@ mlruns/
       ├── [run_id]/
       │   ├── artifacts/
       │   │   ├── model/
-      │   │   └── cosine_sim.npy  (for Content-Based model)
+      │   │   └── user_item_grid.csv
       │   ├── metrics/
-      │   │   ├── rmse
-      │   │   ├── mae
-      │   │   ├── precision_10
+      │   │   ├── precision_5
+      │   │   ├── recall_5
+      │   │   ├── ndcg_5
       │   │   └── ...
       │   └── params/
 ```
@@ -158,14 +149,10 @@ After running `python -m models.model_training`, you should see:
 ```
 Starting RocoMart Model Training Pipeline
 Loading training data from: data_lake/serving/training_sets/training_set_YYYYMMDD_HHMMSS.csv
-Training Matrix Factorization model...
-Matrix Factorization - RMSE: 1.2345, MAE: 0.9876
-Matrix Factorization - Precision@10: 0.5500, Recall@10: 0.6200, NDCG@10: 0.7100
-Training KNN model...
-KNN - RMSE: 1.1234, MAE: 0.8765
-KNN - Precision@10: 0.5800, Recall@10: 0.6400, NDCG@10: 0.7300
-Training Content-Based model...
-Content-Based - accuracy: 0.7500
+Training KNN model (User-Based on Categories)...
+Loading product features from fallback dataset: dataset/olist_products_dataset.csv
+Users with 2+ categories: 728
+KNN (Category User-Based) - Precision@5: 0.2256, Recall@5: 0.9487, NDCG@5: 0.8100
 Performance report saved to: reports/model_performance_report.md
 Training pipeline completed successfully!
 ```
@@ -193,9 +180,9 @@ mlflow ui
 ```
 Open http://localhost:5000/
 ├── Click "RocoMart_Recommendation_Models" experiment
-├── View 3 runs: Matrix Factorization, KNN, Content-Based
-├── Compare metrics across runs
-└── Download model artifacts for deployment
+├── View the latest KNN_Collaborative_Filtering run
+├── Compare metrics across historical runs
+└── Download model artifacts (model, user_item_grid.csv) for deployment
 ```
 
 ### Step 4: Check Performance Report
@@ -208,48 +195,27 @@ cat reports/model_performance_report.md
 
 ### Quick Start (Easiest Approach) 🚀
 
-After training models, get recommendations in one command:
+After training models, get static category recommendations using the testing script:
 
 ```bash
-# Get top-5 NMF recommendations for a user
-python -m models.predict --user-id "012755131a5b785b0ae3291c339a9051" --model NMF --top-k 5
-
-# Get top-10 KNN-based recommendations
-python -m models.predict --user-id "012755131a5b785b0ae3291c339a9051" --model KNN --top-k 10
-
-# Get content-based recommendations
-python -m models.predict --user-id "012755131a5b785b0ae3291c339a9051" --model Content --top-k 5
-
-# Predict rating for a specific product
-python -m models.predict --user-id "012755131a5b785b0ae3291c339a9051" --product-id "product_id_123" --model NMF
+# Get Dynamic AI Report for Category Groups
+python models/predict_static.py
 ```
 
 **Expected Output:**
 
 ```
-======================================================================
-  RocoMart Prediction Engine
-======================================================================
-  User ID: 012755131a5b785b0ae3291c339a9051
-  Model:   NMF
-  Run ID:  abc123def456
-======================================================================
+--- DYNAMIC AI REPORT (K=100) ---
 
+Group 1 Analysis:
+Input Categories: air_conditioning
 Top 5 Recommendations:
-  1. Product: prod_12345            | Predicted Rating: 4.85
-  2. Product: prod_67890            | Predicted Rating: 4.73
-  3. Product: prod_11111            | Predicted Rating: 4.61
-  4. Product: prod_22222            | Predicted Rating: 4.52
-  5. Product: prod_33333            | Predicted Rating: 4.41
+  - furniture_decor                | Confidence: 25.00%
+  - bed_bath_table                 | Confidence: 21.00%
+  - computers_accessories          | Confidence: 16.00%
+  - baby                           | Confidence: 13.00%
+  - garden_tools                   | Confidence: 13.00%
 ```
-
-### Available Models
-
-| Model             | Command             | Description                                  |
-| ----------------- | ------------------- | -------------------------------------------- |
-| **NMF**     | `--model NMF`     | Matrix factorization collaborative filtering |
-| **KNN**     | `--model KNN`     | Item-based k-nearest neighbors               |
-| **Content** | `--model Content` | Content-based using product features         |
 
 ## Files Involved
 

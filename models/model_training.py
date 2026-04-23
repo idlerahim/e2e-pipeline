@@ -290,44 +290,26 @@ def create_performance_report(results):
         f.write(f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n")
 
         f.write("## Executive Summary\n\n")
-        f.write("This report evaluates recommendation models using both rating prediction metrics ")
-        f.write("(RMSE, MAE) and ranking metrics (Precision@K, Recall@K, NDCG@K, MAP@K).\n\n")
+        f.write("This report evaluates recommendation models using ranking metrics (Precision@K, Recall@K, NDCG@K).\n\n")
 
-        f.write("### Rating Prediction Metrics\n\n")
-        f.write("| Model | RMSE | MAE |\n")
-        f.write("|-------|------|-----|\n")
-        for model_name, metrics in results.items():
-            if 'rmse' in metrics:
-                f.write(f"| {model_name} | {metrics['rmse']:.4f} | {metrics['mae']:.4f} |\n")
-
-        f.write("\n### Ranking Metrics (Top-K Evaluation)\n\n")
+        f.write("### Ranking Metrics (Top-K Evaluation)\n\n")
         f.write("These metrics evaluate the quality of ranked recommendations:\n\n")
-        f.write("| Model | Precision@5 | Recall@5 | NDCG@5 | MAP@5 | Precision@10 | Recall@10 | NDCG@10 | MAP@10 |\n")
-        f.write("|-------|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|\n")
+        f.write("| Model | Precision@5 | Recall@5 | NDCG@5 |\n")
+        f.write("|-------|:---:|:---:|:---:|\n")
 
         for model_name, metrics in results.items():
             precision_5 = metrics.get('precision@5', 0)
             recall_5 = metrics.get('recall@5', 0)
             ndcg_5 = metrics.get('ndcg@5', 0)
-            map_5 = metrics.get('map@5', 0)
-            precision_10 = metrics.get('precision@10', 0)
-            recall_10 = metrics.get('recall@10', 0)
-            ndcg_10 = metrics.get('ndcg@10', 0)
-            map_10 = metrics.get('map@10', 0)
             
-            if any([precision_5, precision_10]):  # Only show if ranking metrics exist
-                f.write(f"| {model_name} | {precision_5:.4f} | {recall_5:.4f} | {ndcg_5:.4f} | {map_5:.4f} | ")
-                f.write(f"{precision_10:.4f} | {recall_10:.4f} | {ndcg_10:.4f} | {map_10:.4f} |\n")
+            if any([precision_5, recall_5, ndcg_5]):  # Only show if ranking metrics exist
+                f.write(f"| {model_name} | {precision_5:.4f} | {recall_5:.4f} | {ndcg_5:.4f} |\n")
 
         f.write("\n## Metric Definitions\n\n")
-        f.write("### Rating Prediction Metrics\n")
-        f.write("- **RMSE (Root Mean Square Error)**: Measures average prediction error on actual rating values\n")
-        f.write("- **MAE (Mean Absolute Error)**: Average absolute deviation of predictions from actual ratings\n\n")
         f.write("### Ranking Metrics\n")
-        f.write("- **Precision@K**: Fraction of recommended items (top K) that are relevant (rating >= 4)\n")
+        f.write("- **Precision@K**: Fraction of recommended items (top K) that are relevant\n")
         f.write("- **Recall@K**: Fraction of all relevant items that appear in top K recommendations\n")
-        f.write("- **NDCG@K**: Normalized Discounted Cumulative Gain - rewards relevant items ranked higher\n")
-        f.write("- **MAP@K**: Mean Average Precision - average of precision values at each relevant position\n\n")
+        f.write("- **NDCG@K**: Normalized Discounted Cumulative Gain - rewards relevant items ranked higher\n\n")
 
         f.write("## Model Descriptions\n\n")
         f.write("### KNN (K-Nearest Neighbors)\n")
@@ -339,20 +321,13 @@ def create_performance_report(results):
 
         f.write("## Recommendations\n\n")
         if results:
-            # Find best model by RMSE
-            collaborative_models = {k: v for k, v in results.items() if 'rmse' in v}
-            if collaborative_models:
-                best_model = min(collaborative_models.keys(), key=lambda x: collaborative_models[x]['rmse'])
-                f.write(f"**Best rating prediction model**: {best_model}\n")
-                f.write(f"  - RMSE: {collaborative_models[best_model]['rmse']:.4f}\n\n")
-            
             # Find best model by ranking metrics
-            ranking_models = {k: v for k, v in results.items() if 'ndcg@10' in v}
+            ranking_models = {k: v for k, v in results.items() if 'ndcg@5' in v}
             if ranking_models:
-                best_ranking = max(ranking_models.keys(), key=lambda x: ranking_models[x].get('ndcg@10', 0))
+                best_ranking = max(ranking_models.keys(), key=lambda x: ranking_models[x].get('ndcg@5', 0))
                 f.write(f"**Best ranking model**: {best_ranking}\n")
-                f.write(f"  - NDCG@10: {ranking_models[best_ranking].get('ndcg@10', 0):.4f}\n")
-                f.write(f"  - Precision@10: {ranking_models[best_ranking].get('precision@10', 0):.4f}\n\n")
+                f.write(f"  - NDCG@5: {ranking_models[best_ranking].get('ndcg@5', 0):.4f}\n")
+                f.write(f"  - Precision@5: {ranking_models[best_ranking].get('precision@5', 0):.4f}\n\n")
 
         f.write("## Production Deployment\n\n")
         f.write("The trained models can be deployed using the inference API:\n\n")
