@@ -10,14 +10,48 @@ function Format-Size($bytes) {
 
 Write-Host ""
 Write-Host "============================================" -ForegroundColor Cyan
-Write-Host "   CSV Row Sampler" -ForegroundColor Cyan
+Write-Host "   CSV Row Sampler & Downloader" -ForegroundColor Cyan
 Write-Host "============================================" -ForegroundColor Cyan
 Write-Host ""
 
-# --- Hardcoded Logic ---
+# --- Configuration ---
 $rawDir = "D:\Data\Portfolio\Projects\Python\e2e-pipeline\dataset"
+$archiveDir = Join-Path $PSScriptRoot "dataset_archived"
+$datasetSlug = "olistbr/brazilian-ecommerce"
 $pattern = "dataset"
 
+# --- Step 1: Check/Download Archive ---
+if (-not (Test-Path $archiveDir)) {
+    New-Item -ItemType Directory -Path $archiveDir | Out-Null
+}
+
+$zipFile = Get-ChildItem -Path $archiveDir -Filter "*.zip" | Select-Object -First 1
+
+if ($null -eq $zipFile) {
+    Write-Host "  Archive not found. Downloading from Kaggle..." -ForegroundColor Yellow
+    
+    # Check if Kaggle CLI is installed
+    if (Get-Command kaggle -ErrorAction SilentlyContinue) {
+        kaggle datasets download -d $datasetSlug -p $archiveDir
+        $zipFile = Get-ChildItem -Path $archiveDir -Filter "*.zip" | Select-Object -First 1
+        
+        if ($zipFile) {
+            Write-Host "  Successfully downloaded: $($zipFile.Name)" -ForegroundColor Green
+            Write-Host "  Extracting to $rawDir..." -ForegroundColor DarkGray
+            Expand-Archive -Path $zipFile.FullName -DestinationPath $rawDir -Force
+        }
+    }
+    else {
+        Write-Host "  ERROR: Kaggle CLI not found. Please install it ('pip install kaggle')" -ForegroundColor Red
+        Write-Host "  and ensure your kaggle.json token is in ~/.kaggle/" -ForegroundColor Red
+        exit 1
+    }
+}
+else {
+    Write-Host "  Archive found: $($zipFile.Name). Skipping download." -ForegroundColor DarkGray
+}
+
+# --- Step 2: Validate Data Path ---
 if (-not (Test-Path $rawDir)) {
     Write-Host "  ERROR: Path not found: $rawDir" -ForegroundColor Red
     exit 1
@@ -31,7 +65,7 @@ Write-Host "  $($csvFiles.Count) of $($allCsvFiles.Count) CSV(s) match pattern "
 Write-Host "'$pattern'" -ForegroundColor Yellow
 Write-Host ""
 
-# --- Single Confirmation Step ---
+# --- Step 3: Single Confirmation Step ---
 Write-Host "  Confirm sampling at " -NoNewline
 Write-Host "100%" -ForegroundColor Yellow -NoNewline
 Write-Host "? (Enter 'Y' to proceed, or enter a new % 1-100)" -ForegroundColor White
@@ -52,14 +86,14 @@ $ratio = $percentage / 100.0
 Write-Host "`n  Processing $percentage% sampling..." -ForegroundColor Cyan
 Write-Host ""
 
-# --- Process Each CSV ---
+# --- Step 4: Process Each CSV ---
 $summary = @()
 foreach ($file in $allCsvFiles) {
     if ($file.Name -like "*$pattern*") {
         $origSize = $file.Length
         
         if ($percentage -eq 100) {
-            # Fast-track 100% (No write operation)
+            # Fast-track 100% (Read-only for info)
             $reader = [System.IO.StreamReader]::new($file.FullName)
             $header = $reader.ReadLine()
             $reader.Close()
