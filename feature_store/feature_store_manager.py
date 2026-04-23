@@ -222,6 +222,8 @@ class FeatureStoreManager:
             i.rating_normalized,
             i.user_item_affinity
         FROM interaction_features i
+        INNER JOIN user_features u ON i.customer_unique_id = u.customer_unique_id
+        WHERE u.distinct_categories >= 2
         """
 
         # query = """

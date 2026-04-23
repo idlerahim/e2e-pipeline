@@ -335,14 +335,9 @@ Write-TaskHeader 9 "Model Training & Prediction  (NMF / KNN / Content-Based)"
 
 $t9Pass = $true
 
-# # 9.1 — Refresh training set for model training
-# Write-Host "  [9.1] Regenerating training set before model training …" -ForegroundColor White
-# $ok = Invoke-Step "python -m feature_store.feature_store_manager --training-set"
-# $t9Pass = $t9Pass -and $ok
-
-# 9.2 — Train models; capture output to extract a real user ID
+# 9.1 — Train models; capture output to extract a real user ID
 Write-Host ""
-Write-Host "  [9.2] Training models (NMF, KNN, Content-Based) …" -ForegroundColor White
+Write-Host "  [9.1] Training models (NMF, KNN, Content-Based) …" -ForegroundColor White
 Write-Host "    » python -m models.model_training" -ForegroundColor DarkCyan
 
 $trainLines = python -m models.model_training 2>&1

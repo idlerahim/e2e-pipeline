@@ -18,8 +18,7 @@ import os
 import sys
 import pandas as pd
 import numpy as np
-from sklearn.decomposition import NMF
-from sklearn.feature_extraction.text import TfidfVectorizer
+
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.model_selection import train_test_split
@@ -80,15 +79,16 @@ def load_product_features():
             return pd.read_csv(features_file)
 
     # Fallback to the raw product dataset if curated item features are unavailable
-    fallback_paths = [
-        "dataset/olist_products_dataset.csv",
-        "dataset/product_category_name_translation.csv"
-    ]
-
-    for path in fallback_paths:
-        if os.path.exists(path):
-            print(f"Loading product features from fallback dataset: {path}")
-            return pd.read_csv(path)
+    products_path = "dataset/olist_products_dataset.csv"
+    translation_path = "dataset/product_category_name_translation.csv"
+    
+    if os.path.exists(products_path):
+        print(f"Loading product features from fallback dataset: {products_path}")
+        prod_df = pd.read_csv(products_path)
+        if os.path.exists(translation_path):
+            trans_df = pd.read_csv(translation_path)
+            prod_df = pd.merge(prod_df, trans_df, on='product_category_name', how='left')
+        return prod_df
 
     raise FileNotFoundError("No item features file found and no fallback dataset available")
 
@@ -163,175 +163,123 @@ def build_interaction_matrix(df, user_map, item_map):
     return matrix
 
 
-def train_matrix_factorization_model(all_data_df, train_df, test_df):
-    """Train a matrix factorization model using scikit-learn's NMF."""
-    print("Training Matrix Factorization model...")
-
-    with mlflow.start_run(run_name="Matrix_Factorization_NMF"):
-        n_components = 20
-
-        mlflow.log_param("model_type", "Matrix Factorization (NMF)")
-        mlflow.log_param("n_components", n_components)
-
-        user_map, item_map, _, _ = encode_ids(all_data_df)
-        train_matrix = build_interaction_matrix(train_df, user_map, item_map)
-
-        nmf = NMF(n_components=n_components, init="nndsvda", random_state=42, max_iter=200)
-        user_factors = nmf.fit_transform(train_matrix)
-        item_factors = nmf.components_
-        prediction_matrix = np.clip(np.dot(user_factors, item_factors), 1.0, 5.0)
-
-        predictions = []
-        for row in test_df.itertuples(index=False):
-            if row.customer_unique_id not in user_map or row.product_id not in item_map:
-                est_rating = train_df['rating'].mean()
-            else:
-                user_idx = user_map[row.customer_unique_id]
-                item_idx = item_map[row.product_id]
-                est_rating = float(prediction_matrix[user_idx, item_idx])
-
-            predictions.append({
-                'uid': row.customer_unique_id,
-                'iid': row.product_id,
-                'true_rating': row.rating,
-                'pred_rating': est_rating
-            })
-
-        rmse_score = np.sqrt(mean_squared_error(test_df['rating'], [p['pred_rating'] for p in predictions]))
-        mae_score = mean_absolute_error(test_df['rating'], [p['pred_rating'] for p in predictions])
-
-        mlflow.log_metric("rmse", rmse_score)
-        mlflow.log_metric("mae", mae_score)
-
-        ranking_metrics = compute_ranking_metrics_from_predictions(predictions, k_values=[5, 10])
-        for metric_name, metric_value in ranking_metrics.items():
-            mlflow.log_metric(_normalize_metric_name(metric_name), metric_value)
-
-        mlflow.sklearn.log_model(nmf, "model")
-
-        print(f"Matrix Factorization - RMSE: {rmse_score:.4f}, MAE: {mae_score:.4f}")
-        print(f"Matrix Factorization - Precision@10: {ranking_metrics.get('precision@10', 0):.4f}, Recall@10: {ranking_metrics.get('recall@10', 0):.4f}, NDCG@10: {ranking_metrics.get('ndcg@10', 0):.4f}")
-
-        return nmf, rmse_score, mae_score, ranking_metrics
 
 
 def train_knn_model(all_data_df, train_df, test_df):
-    """Train a KNN-based collaborative filtering model."""
-    print("Training KNN model...")
+    """Train a KNN-based collaborative filtering model (User-Based on Categories)."""
+    print("Training KNN model (User-Based on Categories)...")
 
     with mlflow.start_run(run_name="KNN_Collaborative_Filtering"):
-        k = 40
+        k = 10
 
         mlflow.log_param("model_type", "KNN")
         mlflow.log_param("k", k)
         mlflow.log_param("similarity", "cosine")
-        mlflow.log_param("user_based", False)
+        mlflow.log_param("user_based", True)
 
-        user_map, item_map, _, _ = encode_ids(all_data_df)
-        train_matrix = build_interaction_matrix(train_df, user_map, item_map)
-        item_user_matrix = train_matrix.T
+        # Merge with product features to get categories
+        products_df = load_product_features()
+        if 'category_english' in products_df.columns:
+            cat_col = 'category_english'
+        elif 'product_category_name_english' in products_df.columns:
+            cat_col = 'product_category_name_english'
+        else:
+            cat_col = 'product_category_name'
 
-        nn = NearestNeighbors(n_neighbors=min(k + 1, item_user_matrix.shape[0]), metric="cosine")
-        nn.fit(item_user_matrix)
+        # Merge all_data_df with categories
+        merged_all = pd.merge(all_data_df, products_df[['product_id', cat_col]], on='product_id', how='left')
+        merged_all[cat_col] = merged_all[cat_col].fillna('unknown')
 
-        global_mean = train_df['rating'].mean()
-        predictions = []
+        # Filter users with 2 or more distinct categories
+        user_cat_counts = merged_all.groupby('customer_unique_id')[cat_col].nunique()
+        multi_cat_users = user_cat_counts[user_cat_counts >= 2].index
+        merged_filtered = merged_all[merged_all['customer_unique_id'].isin(multi_cat_users)]
 
-        for row in test_df.itertuples(index=False):
-            if row.customer_unique_id not in user_map or row.product_id not in item_map:
-                est_rating = global_mean
-            else:
-                user_idx = user_map[row.customer_unique_id]
-                item_idx = item_map[row.product_id]
-                item_vector = item_user_matrix[item_idx].reshape(1, -1)
-                distances, neighbors = nn.kneighbors(item_vector, return_distance=True)
-                distances = distances[0]
-                neighbors = neighbors[0]
-                mask = neighbors != item_idx
-                sim_scores = 1.0 - distances[mask]
-                neighbor_items = neighbors[mask]
+        print(f"Users with 2+ categories: {merged_filtered['customer_unique_id'].nunique()}")
 
-                if len(neighbor_items) == 0 or np.sum(sim_scores) <= 1e-9:
-                    user_ratings = train_matrix[user_idx]
-                    relevant = user_ratings[user_ratings > 0]
-                    est_rating = float(relevant.mean()) if len(relevant) > 0 else global_mean
-                else:
-                    neighbor_ratings = train_matrix[user_idx, neighbor_items]
-                    est_rating = float(np.dot(sim_scores, neighbor_ratings) / (np.sum(np.abs(sim_scores)) + 1e-9))
+        # Pivot
+        user_item_grid = merged_filtered.pivot_table(
+            index='customer_unique_id', 
+            columns=cat_col, 
+            values='rating'
+        ).fillna(0)
 
-            est_rating = float(np.clip(est_rating, 1.0, 5.0))
-            predictions.append({
-                'uid': row.customer_unique_id,
-                'iid': row.product_id,
-                'true_rating': row.rating,
-                'pred_rating': est_rating
-            })
+        nn = NearestNeighbors(n_neighbors=min(k + 1, user_item_grid.shape[0]), metric="cosine", algorithm='brute')
+        nn.fit(user_item_grid)
 
-        rmse_score = np.sqrt(mean_squared_error(test_df['rating'], [p['pred_rating'] for p in predictions]))
-        mae_score = mean_absolute_error(test_df['rating'], [p['pred_rating'] for p in predictions])
+        # Merge test_df to get categories like KNN Model.py's test_data
+        test_merged = pd.merge(test_df, products_df[['product_id', cat_col]], on='product_id', how='left')
+        test_merged[cat_col] = test_merged[cat_col].fillna('unknown')
+        # rename columns to match KNN Model.py's expectations
+        test_data = test_merged.rename(columns={
+            'customer_unique_id': 'user_number', 
+            'rating': 'review_score', 
+            cat_col: 'product_category_name_english'
+        })
+        
+        def get_comprehensive_metrics(model, grid, test_data_df, k=5, threshold=4):
+            test_users = test_data_df['user_number'].unique()[:100] 
+            precisions, recalls, ndcgs = [], [], []
 
-        mlflow.log_metric("rmse", rmse_score)
-        mlflow.log_metric("mae", mae_score)
+            for user in test_users:
+                try:
+                    # 1. Get Recommendations
+                    distances, indices = model.kneighbors(grid.loc[[user]], n_neighbors=k+1)
+                    neighbor_indices = grid.iloc[indices[0][1:]].index
+                    
+                    # Get average scores for all categories from neighbors
+                    recommendation_scores = grid.loc[neighbor_indices].mean()
+                    top_k_items = recommendation_scores.sort_values(ascending=False).head(k).index
+                    
+                    # 2. Get Ground Truth (Actual scores from test set)
+                    user_test_data = test_data_df[test_data_df['user_number'] == user]
+                    actual_liked = user_test_data[user_test_data['review_score'] >= threshold]['product_category_name_english'].tolist()
+                    
+                    if not actual_liked: continue
 
-        ranking_metrics = compute_ranking_metrics_from_predictions(predictions, k_values=[5, 10])
-        for metric_name, metric_value in ranking_metrics.items():
-            mlflow.log_metric(_normalize_metric_name(metric_name), metric_value)
+                    # 3. Calculate Precision & Recall
+                    hits = len(set(top_k_items) & set(actual_liked))
+                    precisions.append(hits / k)
+                    recalls.append(hits / len(actual_liked))
+                    
+                    from sklearn.metrics import ndcg_score
+                    # 4. Calculate NDCG
+                    # Create a true relevance array based on test data
+                    true_relevance = np.zeros(len(grid.columns))
+                    for _, row in user_test_data.iterrows():
+                        if row['product_category_name_english'] in grid.columns:
+                            idx = grid.columns.get_loc(row['product_category_name_english'])
+                            true_relevance[idx] = row['review_score']
+                    
+                    # Use neighbor average scores as predicted relevance
+                    pred_relevance = recommendation_scores.values
+                    ndcgs.append(ndcg_score([true_relevance], [pred_relevance], k=k))
+                    
+                except Exception as e: 
+                    continue
+
+            return np.mean(precisions) if precisions else 0, np.mean(recalls) if recalls else 0, np.mean(ndcgs) if ndcgs else 0
+            
+        avg_p, avg_r, avg_n = get_comprehensive_metrics(nn, user_item_grid, test_data, k=5)
+        
+        mlflow.log_metric("precision_5", avg_p)
+        mlflow.log_metric("recall_5", avg_r)
+        mlflow.log_metric("ndcg_5", avg_n)
+        
+        import tempfile
+        with tempfile.TemporaryDirectory() as tmpdir:
+            grid_path = os.path.join(tmpdir, "user_item_grid.csv")
+            user_item_grid.to_csv(grid_path)
+            mlflow.log_artifact(grid_path)
 
         mlflow.sklearn.log_model(nn, "model")
 
-        print(f"KNN - RMSE: {rmse_score:.4f}, MAE: {mae_score:.4f}")
-        print(f"KNN - Precision@10: {ranking_metrics.get('precision@10', 0):.4f}, Recall@10: {ranking_metrics.get('recall@10', 0):.4f}, NDCG@10: {ranking_metrics.get('ndcg@10', 0):.4f}")
+        ranking_metrics = {'precision@5': avg_p, 'recall@5': avg_r, 'ndcg@5': avg_n}
+        print(f"KNN (Category User-Based) - Precision@5: {avg_p:.4f}, Recall@5: {avg_r:.4f}, NDCG@5: {avg_n:.4f}")
 
-        return nn, rmse_score, mae_score, ranking_metrics
+        # Return dummy RMSE/MAE
+        return nn, 0.0, 0.0, ranking_metrics
 
-def train_content_based_model():
-    """Train content-based filtering model."""
-    print("Training Content-Based model...")
-
-    with mlflow.start_run(run_name="Content_Based_Filtering"):
-        # Load product features
-        products_df = load_product_features()
-
-        # Create content features from product descriptions/categories
-        if 'product_description' in products_df.columns:
-            text_features = products_df['product_description'].fillna('')
-        elif 'product_category_name' in products_df.columns:
-            text_features = products_df['product_category_name'].fillna('')
-        elif 'category_english' in products_df.columns:
-            text_features = products_df['category_english'].fillna('')
-        else:
-            raise ValueError("No suitable text features found for content-based filtering")
-
-        # TF-IDF vectorization
-        tfidf = TfidfVectorizer(stop_words='english', max_features=1000)
-        tfidf_matrix = tfidf.fit_transform(text_features)
-
-        # Compute similarity matrix
-        cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
-
-        mlflow.log_param("model_type", "Content-Based")
-        mlflow.log_param("vectorizer", "TF-IDF")
-        mlflow.log_param("max_features", 1000)
-        mlflow.log_param("similarity_metric", "cosine")
-
-        # For evaluation, we'll use a simple accuracy metric
-        # (In a real scenario, you'd evaluate against held-out interactions)
-        # Here we log the model components for later reuse.
-        mlflow.sklearn.log_model(tfidf, "vectorizer")
-
-        import tempfile
-        with tempfile.TemporaryDirectory() as tmpdir:
-            cosine_sim_path = os.path.join(tmpdir, "cosine_sim.npy")
-            np.save(cosine_sim_path, cosine_sim)
-            mlflow.log_artifact(cosine_sim_path)
-
-        # Dummy metrics for demonstration
-        accuracy = 0.75  # Placeholder
-        mlflow.log_metric("accuracy", accuracy)
-
-        print(f"Content-Based - accuracy: {accuracy:.4f}")
-
-        return tfidf, cosine_sim, accuracy
 
 def create_performance_report(results):
     """Create a comprehensive performance report with ranking metrics."""
@@ -382,23 +330,12 @@ def create_performance_report(results):
         f.write("- **MAP@K**: Mean Average Precision - average of precision values at each relevant position\n\n")
 
         f.write("## Model Descriptions\n\n")
-        f.write("### Matrix Factorization (NMF)\n")
-        f.write("- **Type**: Collaborative Filtering (Matrix Factorization)\n")
-        f.write("- **Strengths**: Handles sparse interactions, captures latent factors, scalable\n")
-        f.write("- **Use Case**: General user-item recommendations\n")
-        f.write("- **Parameters**: 20 components, NMF iterative training\n\n")
-
         f.write("### KNN (K-Nearest Neighbors)\n")
-        f.write("- **Type**: Collaborative Filtering (Memory-based)\n")
-        f.write("- **Strengths**: Interpretable, captures local patterns, good for small datasets\n")
-        f.write("- **Use Case**: Item-based recommendations using similarity\n")
-        f.write("- **Parameters**: K=40, similarity metric: cosine, item-based\n\n")
+        f.write("- **Type**: Collaborative Filtering (Memory-based Category User-User)\n")
+        f.write("- **Strengths**: Captures user affinity to specific product categories\n")
+        f.write("- **Use Case**: Providing personalized item recommendations based on categories users tend to purchase from\n")
+        f.write("- **Parameters**: K=10, similarity metric: cosine, user-based\n\n")
 
-        f.write("### Content-Based Filtering\n")
-        f.write("- **Type**: Content-Based\n")
-        f.write("- **Strengths**: Works with new users/items, uses product metadata\n")
-        f.write("- **Use Case**: Recommendations based on product descriptions/categories\n")
-        f.write("- **Method**: TF-IDF vectorization with cosine similarity\n\n")
 
         f.write("## Recommendations\n\n")
         if results:
@@ -442,17 +379,9 @@ def main():
 
         results = {}
 
-        # Train matrix factorization model using NMF
-        mf_model, mf_rmse, mf_mae, mf_ranking = train_matrix_factorization_model(df, train_df, test_df)
-        results['Matrix Factorization (NMF)'] = {'rmse': mf_rmse, 'mae': mf_mae, **mf_ranking}
-
         # Train KNN model
         knn_model, knn_rmse, knn_mae, knn_ranking = train_knn_model(df, train_df, test_df)
         results['KNN'] = {'rmse': knn_rmse, 'mae': knn_mae, **knn_ranking}
-
-        # Train Content-Based model
-        tfidf_model, cosine_sim, cb_accuracy = train_content_based_model()
-        results['Content-Based'] = {'accuracy': cb_accuracy}
 
         # Create performance report
         create_performance_report(results)

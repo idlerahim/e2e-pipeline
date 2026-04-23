@@ -68,52 +68,7 @@ def load_training_data_mapping():
     return df, user_map, item_map, users, items
 
 
-def predict_nmf(user_id: str, product_id: str, run_id: str):
-    """Predict rating using NMF model."""
-    print(f"Loading NMF model from run {run_id}...")
-    
-    # Load model
-    model_uri = f"runs:///{run_id}/model"
-    nmf_model = mlflow.sklearn.load_model(model_uri)
-    
-    # Load training data for mappings
-    df, user_map, item_map, users, items = load_training_data_mapping()
-    
-    if user_id not in user_map:
-        print(f"WARNING: User '{user_id}' not in training data. Using default prediction.")
-        return df['rating'].mean()
-    
-    if product_id not in item_map:
-        print(f"WARNING: Product '{product_id}' not in training data. Using default prediction.")
-        return df['rating'].mean()
-    
-    # Get indices
-    user_idx = user_map[user_id]
-    item_idx = item_map[product_id]
-    
-    # Get NMF factors
-    # Note: We need to rebuild the interaction matrix to get embeddings
-    # This is a limitation when loading pre-trained models
-    print(f"Predicting rating for user {user_id[:12]}... and product {product_id[:12]}...")
-    
-    # Approximate prediction using mean rating
-    user_interactions = df[df['customer_unique_id'] == user_id]
-    if len(user_interactions) > 0:
-        user_avg_rating = user_interactions['rating'].mean()
-    else:
-        user_avg_rating = df['rating'].mean()
-    
-    item_interactions = df[df['product_id'] == product_id]
-    if len(item_interactions) > 0:
-        item_avg_rating = item_interactions['rating'].mean()
-    else:
-        item_avg_rating = df['rating'].mean()
-    
-    # Weighted average prediction
-    predicted_rating = 0.6 * user_avg_rating + 0.4 * item_avg_rating
-    predicted_rating = np.clip(predicted_rating, 1.0, 5.0)
-    
-    return predicted_rating
+
 
 
 def predict_knn(user_id: str, top_k: int, run_id: str):
@@ -124,111 +79,86 @@ def predict_knn(user_id: str, top_k: int, run_id: str):
     model_uri = f"runs:///{run_id}/model"
     knn_model = mlflow.sklearn.load_model(model_uri)
     
+    # Load artifacts (grid and columns)
+    client = mlflow.tracking.MlflowClient()
+    local_dir = client.download_artifacts(run_id, "")
+    
+    grid_path = os.path.join(local_dir, "user_item_grid.csv")
+    if os.path.exists(grid_path):
+        user_item_grid = pd.read_csv(grid_path, index_col=0)
+    else:
+        print("ERROR: user_item_grid not found in artifacts.")
+        return []
+
     # Load training data
     df, user_map, item_map, users, items = load_training_data_mapping()
     
-    if user_id not in user_map:
-        print(f"ERROR: User '{user_id}' not found in training data.")
+    if user_id not in user_item_grid.index:
+        print(f"ERROR: User '{user_id}' not found in training grid.")
         return []
     
-    # Get user's past purchases
+    user_profile = user_item_grid.loc[[user_id]]
     user_items = df[df['customer_unique_id'] == user_id]['product_id'].values
     print(f"User has {len(user_items)} past purchases.")
     
-    # Simple recommendation: items with highest average ratings similar to user's purchases
-    recommendations = []
-    for product_id in items:
-        if product_id not in user_items:
-            avg_rating = df[df['product_id'] == product_id]['rating'].mean()
-            recommendations.append((product_id, avg_rating))
+    k = 100
+    distances, indices = knn_model.kneighbors(user_profile, n_neighbors=min(k, len(user_item_grid)))
     
-    # Sort by rating and return top-k
-    recommendations = sorted(recommendations, key=lambda x: x[1], reverse=True)
-    return recommendations[:top_k]
-
-
-def predict_content_based(user_id: str, top_k: int, run_id: str):
-    """Get recommendations using content-based model."""
-    print(f"Loading Content-Based model from run {run_id}...")
+    neighbor_indices = user_item_grid.iloc[indices[0]].index
+    neighbor_data = user_item_grid.loc[neighbor_indices]
     
-    # Load training data
-    df, user_map, item_map, users, items = load_training_data_mapping()
+    purchase_counts = (neighbor_data > 0).sum()
+    probabilities = (purchase_counts / len(neighbor_indices)) * 100
     
-    if user_id not in user_map:
-        print(f"ERROR: User '{user_id}' not found in training data.")
-        return []
+    user_bought_cats = user_profile.columns[(user_profile > 0).iloc[0]]
+    recommendations = probabilities.drop(labels=user_bought_cats, errors='ignore').sort_values(ascending=False)
     
-    # Get user's past purchases
-    user_items = df[df['customer_unique_id'] == user_id]
-    if len(user_items) == 0:
-        print(f"User has no history. Recommending popular items.")
-        recommendations = df.groupby('product_id')['rating'].count().nlargest(top_k)
-        return [(pid, 0.0) for pid in recommendations.index]
+    # We need product categories to convert category predictions back to items
+    from models.model_training import load_product_features
+    products_df = load_product_features()
     
-    # Get categories of items user liked (rating >= 4)
-    liked_categories = user_items[user_items['rating'] >= 4]['category_english'].unique() \
-        if 'category_english' in user_items.columns else []
-    
-    # Recommend similar items in those categories
-    recommendations = []
-    for product_id in items:
-        if product_id not in user_items['product_id'].values:
-            prod_data = df[df['product_id'] == product_id].iloc[0]
-            if 'category_english' in prod_data and prod_data['category_english'] in liked_categories:
-                score = df[df['product_id'] == product_id]['rating'].mean()
-                recommendations.append((product_id, score))
-    
-    # Sort and return top-k
-    recommendations = sorted(recommendations, key=lambda x: x[1], reverse=True)
-    return recommendations[:top_k]
-
-def predict_hybrid(user_id: str, top_k: int):
-    """Get recommendations using a Hybrid model blending KNN and Content-Based."""
-    print("Loading component models for Hybrid approach...")
-    try:
-        knn_run_id = get_latest_run_id("RocoMart_Recommendation_Models", "KNN_Collaborative_Filtering")
-        cb_run_id = get_latest_run_id("RocoMart_Recommendation_Models", "Content_Based_Filtering")
-    except ValueError as e:
-        print(f"ERROR getting run IDs for hybrid: {e}")
-        return []
-        
-    df, user_map, item_map, users, items = load_training_data_mapping()
-    
-    # We retrieve more items from base models to ensure enough intersection, then cut down at the end
-    print("  -> Fetching base model predictions...")
-    knn_preds = predict_knn(user_id, 100, knn_run_id) 
-    cb_preds = predict_content_based(user_id, 100, cb_run_id)
-    
-    user_items = df[df['customer_unique_id'] == user_id]
-    num_purchases = len(user_items)
-    
-    if num_purchases < 2:
-        knn_weight = 0.2
-        cb_weight = 0.8
-        print(f"\n[Hybrid Logic] User {user_id[:8]}... has {num_purchases} purchases (< 2). Using 80% Content-Based, 20% KNN.")
+    if 'category_english' in products_df.columns:
+        cat_col = 'category_english'
+    elif 'product_category_name_english' in products_df.columns:
+        cat_col = 'product_category_name_english'
     else:
-        knn_weight = 0.8
-        cb_weight = 0.2
-        print(f"\n[Hybrid Logic] User {user_id[:8]}... has {num_purchases} purchases (>= 2). Using 80% KNN, 20% Content-Based.")
+        cat_col = 'product_category_name'
+        
+    prod_cat_map = dict(zip(products_df['product_id'], products_df[cat_col]))
+    
+    top_categories = recommendations.head(top_k * 2).index.tolist()
+    
+    final_recs = []
+    for cat in top_categories:
+        cat_products = [p for p in items if prod_cat_map.get(p) == cat and p not in user_items]
+        
+        cat_product_scores = []
+        for p in cat_products:
+            avg_rating = df[df['product_id'] == p]['rating'].mean()
+            cat_product_scores.append((p, avg_rating + probabilities[cat]/100))
+        
+        cat_product_scores = sorted(cat_product_scores, key=lambda x: x[1], reverse=True)
+        final_recs.extend(cat_product_scores[:2])
+        
+    final_recs = sorted(final_recs, key=lambda x: x[1], reverse=True)
+    
+    # Optional deduplication
+    unique_recs = []
+    seen_products = set()
+    for pid, score in final_recs:
+        if pid not in seen_products:
+            unique_recs.append((pid, score))
+            seen_products.add(pid)
+            
+    return unique_recs[:top_k]
 
-    combined_scores = {}
-    for pid, score in knn_preds:
-        combined_scores[pid] = knn_weight * score
 
-    for pid, score in cb_preds:
-        combined_scores[pid] = combined_scores.get(pid, 0.0) + (cb_weight * score)
-
-    res = sorted(combined_scores.items(), key=lambda x: x[1], reverse=True)
-    return res[:top_k]
 
 
 def main():
     parser = argparse.ArgumentParser(description="RocoMart Model Predictions")
     parser.add_argument("--user-id", type=str, required=True, help="User ID to make predictions for")
-    parser.add_argument("--product-id", type=str, default=None, help="Specific product ID for rating prediction")
     parser.add_argument("--top-k", type=int, default=5, help="Number of recommendations to return")
-    parser.add_argument("--model", type=str, choices=["NMF", "KNN", "Content", "Hybrid"], default="NMF",
-                       help="Model to use for predictions")
     parser.add_argument("--run-id", type=str, default=None, 
                        help="MLflow run ID (auto-detected if not provided)")
     args = parser.parse_args()
@@ -238,83 +168,33 @@ def main():
     
     # Auto-detect run ID if not provided
     run_id = args.run_id
-    if not run_id and args.model != "Hybrid":
-        run_names = {
-            "NMF": "Matrix_Factorization_NMF",
-            "KNN": "KNN_Collaborative_Filtering",
-            "Content": "Content_Based_Filtering"
-        }
+    if not run_id:
         try:
-            run_id = get_latest_run_id("RocoMart_Recommendation_Models", run_names[args.model])
+            run_id = get_latest_run_id("RocoMart_Recommendation_Models", "KNN_Collaborative_Filtering")
             print(f"Auto-detected run ID: {run_id}\n")
         except ValueError as e:
             print(f"ERROR: {e}")
             print("Hint: Run 'mlflow ui' to see available runs")
             return
             
-    if args.model == "Hybrid":
-        run_id = "Multiple (Hybrid)"
-    
     print("=" * 70)
     print(f"  RocoMart Prediction Engine")
     print("=" * 70)
     print(f"  User ID: {args.user_id}")
-    print(f"  Model:   {args.model}")
+    print(f"  Model:   KNN")
     print(f"  Run ID:  {run_id}")
     print("=" * 70)
     
     try:
-        if args.product_id:
-            # Single product rating prediction
-            if args.model == "NMF":
-                predicted_rating = predict_nmf(args.user_id, args.product_id, run_id)
-                print(f"\nPredicted rating for product {args.product_id}: {predicted_rating:.2f}/5.0")
+        # Top-K recommendations
+        print(f"\nGetting top-{args.top_k} recommendations using KNN...")
+        recommendations = predict_knn(args.user_id, args.top_k, run_id)
+        if recommendations:
+            print(f"\nTop {len(recommendations)} Recommendations:")
+            for i, (product_id, score) in enumerate(recommendations, 1):
+                print(f"  {i}. Product: {product_id:20s} | Score: {score:.2f}")
         else:
-            # Top-K recommendations
-            if args.model == "NMF":
-                print(f"\nGetting top-{args.top_k} recommendations using NMF...")
-                # For NMF, we'd need to predict for all items
-                df, user_map, item_map, users, items = load_training_data_mapping()
-                predictions = []
-                user_id_idx = user_map.get(args.user_id)
-                if user_id_idx is not None:
-                    for product_id in items[:10]:  # Limit to first 10 for demo
-                        rating = predict_nmf(args.user_id, product_id, run_id)
-                        predictions.append((product_id, rating))
-                    predictions = sorted(predictions, key=lambda x: x[1], reverse=True)
-                    print(f"\nTop {args.top_k} Recommendations:")
-                    for i, (product_id, score) in enumerate(predictions[:args.top_k], 1):
-                        print(f"  {i}. Product: {product_id:20s} | Predicted Rating: {score:.2f}")
-            
-            elif args.model == "KNN":
-                print(f"\nGetting top-{args.top_k} recommendations using KNN...")
-                recommendations = predict_knn(args.user_id, args.top_k, run_id)
-                if recommendations:
-                    print(f"\nTop {len(recommendations)} Recommendations:")
-                    for i, (product_id, score) in enumerate(recommendations, 1):
-                        print(f"  {i}. Product: {product_id:20s} | Score: {score:.2f}")
-                else:
-                    print("No recommendations available.")
-            
-            elif args.model == "Content":
-                print(f"\nGetting top-{args.top_k} recommendations using Content-Based...")
-                recommendations = predict_content_based(args.user_id, args.top_k, run_id)
-                if recommendations:
-                    print(f"\nTop {len(recommendations)} Recommendations:")
-                    for i, (product_id, score) in enumerate(recommendations, 1):
-                        print(f"  {i}. Product: {product_id:20s} | Score: {score:.2f}")
-                else:
-                    print("No recommendations available.")
-            
-            elif args.model == "Hybrid":
-                print(f"\nGetting top-{args.top_k} recommendations using Hybrid Model...")
-                recommendations = predict_hybrid(args.user_id, args.top_k)
-                if recommendations:
-                    print(f"\nTop {len(recommendations)} Recommendations:")
-                    for i, (product_id, score) in enumerate(recommendations, 1):
-                        print(f"  {i}. Product: {product_id:20s} | Blended Score: {score:.2f}")
-                else:
-                    print("No recommendations available.")
+            print("No recommendations available.")
         
         print("\n" + "=" * 70)
     
