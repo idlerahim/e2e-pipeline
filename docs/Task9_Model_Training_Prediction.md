@@ -217,6 +217,44 @@ Top 5 Recommendations:
   - garden_tools                   | Confidence: 13.00%
 ```
 
+### REST API Inference (Flask)
+
+Start the inference API server:
+
+```bash
+python -m inference.inference_api --port 8000 --host 0.0.0.0
+```
+
+Once running, you can get recommendations using PowerShell or directly in your browser:
+
+#### Using PowerShell (POST)
+
+**Group 1: `["air_conditioning"]`**
+```powershell
+Invoke-RestMethod -Uri "http://127.0.0.1:8000/recommend-categories" -Method Post -ContentType "application/json" -Body '{"categories": ["air_conditioning"], "n_items": 5}' | ConvertTo-Json -Depth 5
+```
+
+**Group 2: `["air_conditioning", "bed_bath_table"]`**
+```powershell
+Invoke-RestMethod -Uri "http://127.0.0.1:8000/recommend-categories" -Method Post -ContentType "application/json" -Body '{"categories": ["air_conditioning", "bed_bath_table"], "n_items": 5}' | ConvertTo-Json -Depth 5
+```
+
+**Group 3: `["music", "party_supplies", "toys"]`**
+```powershell
+Invoke-RestMethod -Uri "http://127.0.0.1:8000/recommend-categories" -Method Post -ContentType "application/json" -Body '{"categories": ["music", "party_supplies", "toys"], "n_items": 5}' | ConvertTo-Json -Depth 5
+```
+
+#### Using Browser URLs (GET)
+
+**Group 1: `["air_conditioning"]`**
+[http://127.0.0.1:8000/recommend-categories?category=air_conditioning&n_items=5](http://127.0.0.1:8000/recommend-categories?category=air_conditioning&n_items=5)
+
+**Group 2: `["air_conditioning", "bed_bath_table"]`**
+[http://127.0.0.1:8000/recommend-categories?category=air_conditioning&category=bed_bath_table&n_items=5](http://127.0.0.1:8000/recommend-categories?category=air_conditioning&category=bed_bath_table&n_items=5)
+
+**Group 3: `["music", "party_supplies", "toys"]`**
+[http://127.0.0.1:8000/recommend-categories?category=music&category=party_supplies&category=toys&n_items=5](http://127.0.0.1:8000/recommend-categories?category=music&category=party_supplies&category=toys&n_items=5)
+
 ## Files Involved
 
 ```
