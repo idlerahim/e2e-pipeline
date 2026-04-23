@@ -264,8 +264,7 @@ The end-to-end data management pipeline is expected to produce the following out
 
 | Component | Description | Implementation |
 |-----------|-------------|-----------------|
-| **Collaborative Filtering Model** | Matrix Factorization (NMF) trained on user-item interaction matrix | `models/model_training.py` using scikit-learn |
-| **Content-Based Filtering Model** | TF-IDF or embedding-based similarity using product attributes | TF-IDF vectorization with cosine similarity |
+| **Collaborative Filtering Model** | Memory-based Category User-User KNN trained on user-category interactions | `models/model_training.py` using scikit-learn |
 | **Model Artifacts** | Serialized model files (.pkl / .joblib) versioned and stored | MLflow-tracked artifacts in `mlruns/` |
 | **REST API Inference Service** | Flask-based API endpoint that accepts user ID and returns top-K recommendations | `inference/inference_api.py` (see section 3.3.1) |
 | **Feature Store Integration** | Online and batch serving of features via feature store | `feature_store/feature_store_manager.py` |
@@ -339,14 +338,9 @@ These metrics evaluate how well the recommendation system ranks items for each u
 | **NDCG@K** (Normalized Discounted Cumulative Gain) | DCG@K / iDCG@K where DCG = Σ(rel_i / log₂(i+1)) | Evaluates ranking quality by giving more weight to relevant items appearing at higher positions; ranges from 0 to 1 | Computed in `models/evaluation_metrics.py` |
 | **MAP@K** (Mean Average Precision) | Average of Precision@K computed at each relevant position | Aggregates precision scores across all relevant items, penalizing when relevant items appear late | Computed in `models/evaluation_metrics.py` |
 
-### 4.2 Rating Prediction Metrics (Secondary)
+### 4.2 Rating Prediction Metrics (Deprecated)
 
-For explicit rating prediction, we also track:
-
-| Metric | Description | Purpose |
-|--------|-------------|---------|
-| **RMSE** | Root Mean Squared Error on predicted vs. actual ratings | Measures average prediction error magnitude |
-| **MAE** | Mean Absolute Error on predicted vs. actual ratings | Measures average prediction error in standard units |
+*Note: RMSE and MAE are no longer used as the system has transitioned entirely to implicit categorical intent prediction rather than explicit 1-5 star rating prediction.*
 
 ### 4.3 Evaluation Approach
 
@@ -400,7 +394,7 @@ flowchart LR
 4. **Data Preparation**: Cleaning, encoding categorical variables, normalizing numerical features, handling missing interactions.
 5. **Feature Engineering and Transformation**: User/item aggregate features, co-occurrence matrices, temporal features.
 6. **Feature Store**: Centralized feature registry with versioning (using Feast or custom implementation).
-7. **Model Training**: Collaborative filtering (SVD) and/or content-based model with MLflow tracking.
+7. **Model Training**: Memory-based Category User-User KNN collaborative filtering with MLflow tracking.
 8. **Pipeline Orchestration**: Automated DAGs using Apache Airflow / Prefect / Dagster.
 9. **Data Versioning & Lineage**: DVC or Git LFS for dataset versioning; metadata tracking for lineage.
 
