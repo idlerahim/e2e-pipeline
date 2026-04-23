@@ -62,8 +62,9 @@ The `--pit` flag enables **point-in-time lookups**:
 
 The `--training-set` command:
 
-- Joins `interaction_features`, `user_features`, and `item_features` via SQL
-- Produces a flat DataFrame with 31 features per row
+- Joins `interaction_features` and `user_features` via SQL
+- Filters for users with `distinct_categories >= 2`
+- Produces a flat DataFrame with 7 essential recommendation features per row
 - Optional `--sample N` to randomly sample N rows
 - Saves to `data_lake/serving/training_sets/`
 
