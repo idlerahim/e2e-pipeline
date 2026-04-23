@@ -1,5 +1,5 @@
 $folders = @("data_lake", "reports", "logs", "mlruns", "dataset")
-$files   = @("mlflow.db", "prefect.db")
+$files = @("mlflow.db", "prefect.db", "cosine_sim.npy")
 
 Write-Host "`nCleaning project directory..." -ForegroundColor Cyan
 
@@ -9,7 +9,8 @@ foreach ($folder in $folders) {
     if (Test-Path $path) {
         Remove-Item -Path "$path\*" -Recurse -Force
         Write-Host "  ✓ Emptied $folder\" -ForegroundColor Green
-    } else {
+    }
+    else {
         Write-Host "  - Skipped $folder\ (not found)" -ForegroundColor DarkGray
     }
 }
@@ -20,7 +21,8 @@ foreach ($file in $files) {
     if (Test-Path $path) {
         Remove-Item -Path $path -Force
         Write-Host "  ✓ Removed $file" -ForegroundColor Green
-    } else {
+    }
+    else {
         Write-Host "  - Skipped $file (not found)" -ForegroundColor DarkGray
     }
 }
@@ -29,24 +31,27 @@ foreach ($file in $files) {
 Write-Host "`nExtracting archives..." -ForegroundColor Cyan
 
 $archiveDir = Join-Path $PSScriptRoot "dataset_archived"
-$destDir    = Join-Path $PSScriptRoot "dataset"
+$destDir = Join-Path $PSScriptRoot "dataset"
 
 if (Test-Path $archiveDir) {
     $zips = Get-ChildItem -Path $archiveDir -Filter "*.zip"
 
     if ($zips.Count -eq 0) {
         Write-Host "  - No .zip files found in dataset_archived\" -ForegroundColor DarkGray
-    } else {
+    }
+    else {
         foreach ($zip in $zips) {
             try {
                 Expand-Archive -Path $zip.FullName -DestinationPath $destDir -Force
                 Write-Host "  ✓ Extracted $($zip.Name)" -ForegroundColor Green
-            } catch {
+            }
+            catch {
                 Write-Host "  ✗ Failed to extract $($zip.Name): $_" -ForegroundColor Red
             }
         }
     }
-} else {
+}
+else {
     Write-Host "  - Skipped extraction (dataset_archived\ not found)" -ForegroundColor DarkGray
 }
 

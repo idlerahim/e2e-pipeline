@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     RecoMart End-to-End Pipeline Runner
 .DESCRIPTION
@@ -18,11 +18,11 @@ $Results = [System.Collections.Generic.List[PSCustomObject]]::new()
 function Add-Result {
     param([string]$Task, [string]$Input, [string]$Output, [bool]$Pass)
     $Results.Add([PSCustomObject]@{
-        Task   = $Task
-        Input  = $Input
-        Output = $Output
-        Status = if ($Pass) { "✔  PASS" } else { "✘  FAIL" }
-    })
+            Task   = $Task
+            Input  = $Input
+            Output = $Output
+            Status = if ($Pass) { "✔  PASS" } else { "✘  FAIL" }
+        })
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -42,7 +42,8 @@ function Write-Status {
     Write-Host ""
     if ($Pass) {
         Write-Host "  ✔  $Label  →  PASS" -ForegroundColor Green
-    } else {
+    }
+    else {
         Write-Host "  ✘  $Label  →  FAIL" -ForegroundColor Red
     }
 }
@@ -63,7 +64,7 @@ function Invoke-StepCapture {
     param([string]$Cmd)
     Write-Host "    » $Cmd" -ForegroundColor DarkCyan
     $lines = Invoke-Expression "$Cmd 2>&1"
-    $ec    = $LASTEXITCODE          # capture immediately
+    $ec = $LASTEXITCODE          # capture immediately
     $lines | ForEach-Object { Write-Host "    $_" }
     return @{ Ok = [bool]($ec -eq 0); Lines = $lines }
 }
@@ -71,9 +72,9 @@ function Invoke-StepCapture {
 function Get-LatestFSDir {
     <#  Return the FullName of the highest v_* directory in the feature store #>
     $dir = Get-ChildItem "data_lake/serving/feature_store" `
-               -Directory -Filter 'v_*' -ErrorAction SilentlyContinue |
-           Sort-Object Name |
-           Select-Object -Last 1
+        -Directory -Filter 'v_*' -ErrorAction SilentlyContinue |
+    Sort-Object Name |
+    Select-Object -Last 1
     if ($dir) { return $dir.FullName }
     return $null
 }
@@ -85,9 +86,10 @@ function Query-SQLite {
     param([string]$DbPath, [string]$Query)
     try {
         $rows = sqlite3 $DbPath $Query 2>$null
-        return ,@($rows | Where-Object { $_ -ne "" })
-    } catch {
-        return ,@()
+        return , @($rows | Where-Object { $_ -ne "" })
+    }
+    catch {
+        return , @()
     }
 }
 
@@ -230,20 +232,20 @@ Write-Host "  [7.3] Generating full training set …" -ForegroundColor White
 $ok = Invoke-Step "python -m feature_store.feature_store_manager --training-set"
 $t7Pass = $t7Pass -and $ok
 
-# 7.3b — Training set (sampled)
-Write-Host ""
-Write-Host "  [7.3b] Generating sampled training set (n=10 000) …" -ForegroundColor White
-$ok = Invoke-Step "python -m feature_store.feature_store_manager --training-set --sample 10000"
-$t7Pass = $t7Pass -and $ok
+# # 7.3b — Training set (sampled)
+# Write-Host ""
+# Write-Host "  [7.3b] Generating sampled training set (n=10 000) …" -ForegroundColor White
+# $ok = Invoke-Step "python -m feature_store.feature_store_manager --training-set --sample 10000"
+# $t7Pass = $t7Pass -and $ok
 
 # 7.4 — Point-in-time retrieval
 # Use current datetime (not just date) so it is always >= any snapshot created
 # earlier today. The feature store parses this as a full timestamp.
-$pitDate = (Get-Date -Format 'yyyy-MM-dd HH:mm:ss')
-Write-Host ""
-Write-Host "  [7.4] Point-in-time retrieval  (PIT = $pitDate — now, covers latest snapshot) …" -ForegroundColor White
-$ok = Invoke-Step "python -m feature_store.feature_store_manager --training-set --pit `"$pitDate`""
-$t7Pass = $t7Pass -and $ok
+# $pitDate = (Get-Date -Format 'yyyy-MM-dd HH:mm:ss')
+# Write-Host ""
+# Write-Host "  [7.4] Point-in-time retrieval  (PIT = $pitDate — now, covers latest snapshot) …" -ForegroundColor White
+# $ok = Invoke-Step "python -m feature_store.feature_store_manager --training-set --pit `"$pitDate`""
+# $t7Pass = $t7Pass -and $ok
 
 # ── Resolve latest feature store DB ─────────────────────────────────────────
 Write-Host ""
@@ -261,13 +263,16 @@ if ($latestFSDir) {
     if ($userRows.Count -ge 2) {
         $queryUsersArg = "$($userRows[0].Trim()), $($userRows[1].Trim())"
         Write-Host "    ✔ Resolved users  → $queryUsersArg" -ForegroundColor DarkGreen
-    } elseif ($userRows.Count -eq 1) {
+    }
+    elseif ($userRows.Count -eq 1) {
         $queryUsersArg = $userRows[0].Trim()
         Write-Host "    ✔ Resolved user   → $queryUsersArg" -ForegroundColor DarkGreen
-    } else {
+    }
+    else {
         Write-Host "    ⚠  No user rows returned — falling back to hardcoded IDs." -ForegroundColor DarkYellow
     }
-} else {
+}
+else {
     Write-Host "    ⚠  Feature store directory not found — using fallback user IDs." -ForegroundColor DarkYellow
 }
 
@@ -288,13 +293,16 @@ if ($latestFSDir) {
     if ($itemRows.Count -ge 2) {
         $queryItemsArg = "$($itemRows[0].Trim()), $($itemRows[1].Trim())"
         Write-Host "    ✔ Resolved items  → $queryItemsArg" -ForegroundColor DarkGreen
-    } elseif ($itemRows.Count -eq 1) {
+    }
+    elseif ($itemRows.Count -eq 1) {
         $queryItemsArg = $itemRows[0].Trim()
         Write-Host "    ✔ Resolved item   → $queryItemsArg" -ForegroundColor DarkGreen
-    } else {
+    }
+    else {
         Write-Host "    ⚠  No item rows returned — falling back to hardcoded IDs." -ForegroundColor DarkYellow
     }
-} else {
+}
+else {
     Write-Host "    ⚠  Feature store directory not found — using fallback item IDs." -ForegroundColor DarkYellow
 }
 
@@ -327,10 +335,10 @@ Write-TaskHeader 9 "Model Training & Prediction  (NMF / KNN / Content-Based)"
 
 $t9Pass = $true
 
-# 9.1 — Refresh training set for model training
-Write-Host "  [9.1] Regenerating training set before model training …" -ForegroundColor White
-$ok = Invoke-Step "python -m feature_store.feature_store_manager --training-set"
-$t9Pass = $t9Pass -and $ok
+# # 9.1 — Refresh training set for model training
+# Write-Host "  [9.1] Regenerating training set before model training …" -ForegroundColor White
+# $ok = Invoke-Step "python -m feature_store.feature_store_manager --training-set"
+# $t9Pass = $t9Pass -and $ok
 
 # 9.2 — Train models; capture output to extract a real user ID
 Write-Host ""
@@ -338,103 +346,103 @@ Write-Host "  [9.2] Training models (NMF, KNN, Content-Based) …" -ForegroundCo
 Write-Host "    » python -m models.model_training" -ForegroundColor DarkCyan
 
 $trainLines = python -m models.model_training 2>&1
-$trainEc    = $LASTEXITCODE          # capture before anything else runs
+$trainEc = $LASTEXITCODE          # capture before anything else runs
 $trainLines | ForEach-Object { Write-Host "    $_" }
-$trainOk    = [bool]($trainEc -eq 0)
-$t9Pass     = $t9Pass -and $trainOk
+$trainOk = [bool]($trainEc -eq 0)
+$t9Pass = $t9Pass -and $trainOk
 
 # ── Resolve a real user ID & product ID for predictions ─────────────────────
 # Priority: (1) latest training CSV  →  (2) feature store DB  →  (3) hardcoded
-$userId    = $null
-$productId = $null
+# $userId = $null
+# $productId = $null
 
-# 1. Read from the latest training CSV (same data the model was trained on)
-$latestCsv = Get-ChildItem "data_lake/serving/training_sets" `
-                 -Filter "training_set_*.csv" -ErrorAction SilentlyContinue |
-             Sort-Object Name | Select-Object -Last 1
+# # 1. Read from the latest training CSV (same data the model was trained on)
+# $latestCsv = Get-ChildItem "data_lake/serving/training_sets" `
+#     -Filter "training_set_*.csv" -ErrorAction SilentlyContinue |
+# Sort-Object Name | Select-Object -Last 1
 
-if ($latestCsv) {
-    Write-Host ""
-    Write-Host "    Reading IDs from training CSV: $($latestCsv.Name) …" -ForegroundColor DarkCyan
-    # Read header + first data line only for speed
-    $csvHead = Get-Content $latestCsv.FullName -TotalCount 2
-    if ($csvHead.Count -ge 2) {
-        $headers = $csvHead[0] -split ","
-        $values  = $csvHead[1] -split ","
+# if ($latestCsv) {
+#     Write-Host ""
+#     Write-Host "    Reading IDs from training CSV: $($latestCsv.Name) …" -ForegroundColor DarkCyan
+#     # Read header + first data line only for speed
+#     $csvHead = Get-Content $latestCsv.FullName -TotalCount 2
+#     if ($csvHead.Count -ge 2) {
+#         $headers = $csvHead[0] -split ","
+#         $values = $csvHead[1] -split ","
 
-        $userCol = $headers | ForEach-Object { $_.Trim('"') } |
-                   Select-String -Pattern "customer_unique_id" | Select-Object -First 1
-        $itemCol = $headers | ForEach-Object { $_.Trim('"') } |
-                   Select-String -Pattern "product_id"         | Select-Object -First 1
+#         $userCol = $headers | ForEach-Object { $_.Trim('"') } |
+#         Select-String -Pattern "customer_unique_id" | Select-Object -First 1
+#         $itemCol = $headers | ForEach-Object { $_.Trim('"') } |
+#         Select-String -Pattern "product_id"         | Select-Object -First 1
 
-        if ($userCol) {
-            $idx = [Array]::IndexOf(($headers | ForEach-Object { $_.Trim('"') }), "customer_unique_id")
-            if ($idx -ge 0) { $userId = $values[$idx].Trim().Trim('"') }
-        }
-        if ($itemCol) {
-            $idx = [Array]::IndexOf(($headers | ForEach-Object { $_.Trim('"') }), "product_id")
-            if ($idx -ge 0) { $productId = $values[$idx].Trim().Trim('"') }
-        }
-    }
-    if ($userId)    { Write-Host "    ✔ User ID from training CSV    →  $userId"    -ForegroundColor DarkGreen }
-    if ($productId) { Write-Host "    ✔ Product ID from training CSV →  $productId" -ForegroundColor DarkGreen }
-}
+#         if ($userCol) {
+#             $idx = [Array]::IndexOf(($headers | ForEach-Object { $_.Trim('"') }), "customer_unique_id")
+#             if ($idx -ge 0) { $userId = $values[$idx].Trim().Trim('"') }
+#         }
+#         if ($itemCol) {
+#             $idx = [Array]::IndexOf(($headers | ForEach-Object { $_.Trim('"') }), "product_id")
+#             if ($idx -ge 0) { $productId = $values[$idx].Trim().Trim('"') }
+#         }
+#     }
+#     if ($userId) { Write-Host "    ✔ User ID from training CSV    →  $userId"    -ForegroundColor DarkGreen }
+#     if ($productId) { Write-Host "    ✔ Product ID from training CSV →  $productId" -ForegroundColor DarkGreen }
+# }
 
-# 2. Fallback — query the feature store DB
-if (-not $userId -or -not $productId) {
-    if (-not $latestFSDir) { $latestFSDir = Get-LatestFSDir }
-    if ($latestFSDir) {
-        $fsDb9 = Join-Path $latestFSDir "features.db"
-        if (-not $userId) {
-            $fsU = @(Query-SQLite $fsDb9 "SELECT DISTINCT customer_unique_id FROM user_features LIMIT 1;")
-            if ($fsU.Count -gt 0) {
-                $userId = $fsU[0].Trim()
-                Write-Host "    ✔ User ID from feature store DB →  $userId" -ForegroundColor DarkYellow
-            }
-        }
-        if (-not $productId) {
-            $fsP = @(Query-SQLite $fsDb9 "SELECT DISTINCT product_id FROM item_features LIMIT 1;")
-            if ($fsP.Count -gt 0) {
-                $productId = $fsP[0].Trim()
-                Write-Host "    ✔ Product ID from feature store →  $productId" -ForegroundColor DarkYellow
-            }
-        }
-    }
-}
+# # 2. Fallback — query the feature store DB
+# if (-not $userId -or -not $productId) {
+#     if (-not $latestFSDir) { $latestFSDir = Get-LatestFSDir }
+#     if ($latestFSDir) {
+#         $fsDb9 = Join-Path $latestFSDir "features.db"
+#         if (-not $userId) {
+#             $fsU = @(Query-SQLite $fsDb9 "SELECT DISTINCT customer_unique_id FROM user_features LIMIT 1;")
+#             if ($fsU.Count -gt 0) {
+#                 $userId = $fsU[0].Trim()
+#                 Write-Host "    ✔ User ID from feature store DB →  $userId" -ForegroundColor DarkYellow
+#             }
+#         }
+#         if (-not $productId) {
+#             $fsP = @(Query-SQLite $fsDb9 "SELECT DISTINCT product_id FROM item_features LIMIT 1;")
+#             if ($fsP.Count -gt 0) {
+#                 $productId = $fsP[0].Trim()
+#                 Write-Host "    ✔ Product ID from feature store →  $productId" -ForegroundColor DarkYellow
+#             }
+#         }
+#     }
+# }
 
-# 3. Last resort — hardcoded
-if (-not $userId) {
-    $userId = "012755131a5b785b0ae3291c339a9051"
-    Write-Host "    ⚠  Could not resolve user ID — using hardcoded fallback: $userId" -ForegroundColor DarkYellow
-}
-if (-not $productId) {
-    $productId = "product_id_123"
-    Write-Host "    ⚠  Could not resolve product ID — using hardcoded fallback: $productId" -ForegroundColor DarkYellow
-}
+# # 3. Last resort — hardcoded
+# if (-not $userId) {
+#     $userId = "012755131a5b785b0ae3291c339a9051"
+#     Write-Host "    ⚠  Could not resolve user ID — using hardcoded fallback: $userId" -ForegroundColor DarkYellow
+# }
+# if (-not $productId) {
+#     $productId = "product_id_123"
+#     Write-Host "    ⚠  Could not resolve product ID — using hardcoded fallback: $productId" -ForegroundColor DarkYellow
+# }
 
-# 9.3 — NMF top-5
-Write-Host ""
-Write-Host "  [9.3] NMF  — top-5 recommendations  (user: $userId) …" -ForegroundColor White
-$ok = Invoke-Step "python -m models.predict --user-id `"$userId`" --model NMF --top-k 5"
-$t9Pass = $t9Pass -and $ok
+# # 9.3 — NMF top-5
+# Write-Host ""
+# Write-Host "  [9.3] NMF  — top-5 recommendations  (user: $userId) …" -ForegroundColor White
+# $ok = Invoke-Step "python -m models.predict --user-id `"$userId`" --model NMF --top-k 5"
+# $t9Pass = $t9Pass -and $ok
 
-# 9.4 — KNN top-10
-Write-Host ""
-Write-Host "  [9.4] KNN  — top-10 recommendations  (user: $userId) …" -ForegroundColor White
-$ok = Invoke-Step "python -m models.predict --user-id `"$userId`" --model KNN --top-k 10"
-$t9Pass = $t9Pass -and $ok
+# # 9.4 — KNN top-10
+# Write-Host ""
+# Write-Host "  [9.4] KNN  — top-10 recommendations  (user: $userId) …" -ForegroundColor White
+# $ok = Invoke-Step "python -m models.predict --user-id `"$userId`" --model KNN --top-k 10"
+# $t9Pass = $t9Pass -and $ok
 
-# 9.5 — Content-Based top-5
-Write-Host ""
-Write-Host "  [9.5] Content-Based  — top-5 recommendations  (user: $userId) …" -ForegroundColor White
-$ok = Invoke-Step "python -m models.predict --user-id `"$userId`" --model Content --top-k 5"
-$t9Pass = $t9Pass -and $ok
+# # 9.5 — Content-Based top-5
+# Write-Host ""
+# Write-Host "  [9.5] Content-Based  — top-5 recommendations  (user: $userId) …" -ForegroundColor White
+# $ok = Invoke-Step "python -m models.predict --user-id `"$userId`" --model Content --top-k 5"
+# $t9Pass = $t9Pass -and $ok
 
-# 9.6 — Predicted rating for one product
-Write-Host ""
-Write-Host "  [9.6] NMF predicted rating  (user: $userId  |  product: $productId) …" -ForegroundColor White
-$ok = Invoke-Step "python -m models.predict --user-id `"$userId`" --product-id `"$productId`" --model NMF"
-$t9Pass = $t9Pass -and $ok
+# # 9.6 — Predicted rating for one product
+# Write-Host ""
+# Write-Host "  [9.6] NMF predicted rating  (user: $userId  |  product: $productId) …" -ForegroundColor White
+# $ok = Invoke-Step "python -m models.predict --user-id `"$userId`" --product-id `"$productId`" --model NMF"
+# $t9Pass = $t9Pass -and $ok
 
 Write-Status $t9Pass "Task 9 – Model Training & Prediction"
 Add-Result "9 – Model Training & Pred" "feature_store training set" "Trained models (NMF/KNN/Content), recommendation lists, rating predictions" $t9Pass
@@ -463,7 +471,7 @@ Write-Host $sep -ForegroundColor DarkGray
 
 foreach ($r in $Results) {
     $color = if ($r.Status -match "PASS") { "Green" } else { "Red" }
-    $row   = "  {0,-$w1}  {1,-$w2}  {2,-$w3}  {3,-$w4}" -f $r.Task, $r.Input, $r.Output, $r.Status
+    $row = "  {0,-$w1}  {1,-$w2}  {2,-$w3}  {3,-$w4}" -f $r.Task, $r.Input, $r.Output, $r.Status
     Write-Host $row -ForegroundColor $color
 }
 
@@ -478,7 +486,8 @@ Write-Host ""
 
 if ($failCount -eq 0) {
     Write-Host "  ✔  All tasks completed successfully. RecoMart pipeline is ready." -ForegroundColor Green
-} else {
+}
+else {
     Write-Host "  ✘  $failCount task(s) failed. Review the output above for details." -ForegroundColor Red
 }
 

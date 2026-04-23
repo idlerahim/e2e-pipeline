@@ -220,35 +220,47 @@ class FeatureStoreManager:
             i.purchase_count,
             i.implicit_signal,
             i.rating_normalized,
-            i.user_item_affinity,
-            u.total_spending,
-            u.avg_order_value,
-            u.avg_rating_given,
-            u.review_count AS user_review_count,
-            u.distinct_products,
-            u.distinct_categories,
-            u.preferred_category,
-            u.recency_days,
-            u.purchase_freq_log,
-            u.spending_normalized,
-            u.aov_normalized,
-            u.customer_state,
-            it.category_english,
-            it.total_sold,
-            it.avg_rating_received,
-            it.review_count AS item_review_count,
-            it.avg_price,
-            it.total_revenue,
-            it.distinct_buyers,
-            it.popularity_rank,
-            it.price_percentile,
-            it.price_normalized,
-            it.sold_normalized,
-            it.rating_normalized AS item_rating_normalized
+            i.user_item_affinity
         FROM interaction_features i
-        LEFT JOIN user_features u ON i.customer_unique_id = u.customer_unique_id
-        LEFT JOIN item_features it ON i.product_id = it.product_id
         """
+
+        # query = """
+        # SELECT
+        #     i.customer_unique_id,
+        #     i.product_id,
+        #     i.rating,
+        #     i.purchase_count,
+        #     i.implicit_signal,
+        #     i.rating_normalized,
+        #     i.user_item_affinity,
+        #     u.total_spending,
+        #     u.avg_order_value,
+        #     u.avg_rating_given,
+        #     u.review_count AS user_review_count,
+        #     u.distinct_products,
+        #     u.distinct_categories,
+        #     u.preferred_category,
+        #     u.recency_days,
+        #     u.purchase_freq_log,
+        #     u.spending_normalized,
+        #     u.aov_normalized,
+        #     u.customer_state,
+        #     it.category_english,
+        #     it.total_sold,
+        #     it.avg_rating_received,
+        #     it.review_count AS item_review_count,
+        #     it.avg_price,
+        #     it.total_revenue,
+        #     it.distinct_buyers,
+        #     it.popularity_rank,
+        #     it.price_percentile,
+        #     it.price_normalized,
+        #     it.sold_normalized,
+        #     it.rating_normalized AS item_rating_normalized
+        # FROM interaction_features i
+        # LEFT JOIN user_features u ON i.customer_unique_id = u.customer_unique_id
+        # LEFT JOIN item_features it ON i.product_id = it.product_id
+        # """
 
         if sample_size:
             query += f" ORDER BY RANDOM() LIMIT {sample_size}"
