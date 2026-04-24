@@ -114,7 +114,7 @@ $summary = @(
     [PSCustomObject]@{ N = 6; Summary = "Feature Engineering    Build user, item & interaction feature sets" },
     [PSCustomObject]@{ N = 7; Summary = "Feature Store          Register snapshot, query features, build training sets (PIT + dynamic IDs)" },
     [PSCustomObject]@{ N = 8; Summary = "Data Versioning        Informational note  (model versioning skipped)" },
-    [PSCustomObject]@{ N = 9; Summary = "Model Training & Pred  Train NMF / KNN / Content; run top-k & rating predictions" }
+    [PSCustomObject]@{ N = 9; Summary = "Model Training & Pred  Train KNN" }
 )
 
 foreach ($t in $summary) {
@@ -331,13 +331,13 @@ Add-Result "8 – Data Versioning" "N/A (skipped)" "Informational — no artefac
 # ═════════════════════════════════════════════════════════════════════════════
 #  TASK 9 — Model Training & Prediction
 # ═════════════════════════════════════════════════════════════════════════════
-Write-TaskHeader 9 "Model Training & Prediction  (NMF / KNN / Content-Based)"
+Write-TaskHeader 9 "Model Training & Prediction  (KNN)"
 
 $t9Pass = $true
 
 # 9.1 — Train models; capture output to extract a real user ID
 Write-Host ""
-Write-Host "  [9.1] Training models (NMF, KNN, Content-Based) …" -ForegroundColor White
+Write-Host "  [9.1] Training models (KNN) …" -ForegroundColor White
 Write-Host "    » python -m models.model_training" -ForegroundColor DarkCyan
 
 $trainLines = python -m models.model_training 2>&1
@@ -346,101 +346,8 @@ $trainLines | ForEach-Object { Write-Host "    $_" }
 $trainOk = [bool]($trainEc -eq 0)
 $t9Pass = $t9Pass -and $trainOk
 
-# ── Resolve a real user ID & product ID for predictions ─────────────────────
-# Priority: (1) latest training CSV  →  (2) feature store DB  →  (3) hardcoded
-# $userId = $null
-# $productId = $null
-
-# # 1. Read from the latest training CSV (same data the model was trained on)
-# $latestCsv = Get-ChildItem "data_lake/serving/training_sets" `
-#     -Filter "training_set_*.csv" -ErrorAction SilentlyContinue |
-# Sort-Object Name | Select-Object -Last 1
-
-# if ($latestCsv) {
-#     Write-Host ""
-#     Write-Host "    Reading IDs from training CSV: $($latestCsv.Name) …" -ForegroundColor DarkCyan
-#     # Read header + first data line only for speed
-#     $csvHead = Get-Content $latestCsv.FullName -TotalCount 2
-#     if ($csvHead.Count -ge 2) {
-#         $headers = $csvHead[0] -split ","
-#         $values = $csvHead[1] -split ","
-
-#         $userCol = $headers | ForEach-Object { $_.Trim('"') } |
-#         Select-String -Pattern "customer_unique_id" | Select-Object -First 1
-#         $itemCol = $headers | ForEach-Object { $_.Trim('"') } |
-#         Select-String -Pattern "product_id"         | Select-Object -First 1
-
-#         if ($userCol) {
-#             $idx = [Array]::IndexOf(($headers | ForEach-Object { $_.Trim('"') }), "customer_unique_id")
-#             if ($idx -ge 0) { $userId = $values[$idx].Trim().Trim('"') }
-#         }
-#         if ($itemCol) {
-#             $idx = [Array]::IndexOf(($headers | ForEach-Object { $_.Trim('"') }), "product_id")
-#             if ($idx -ge 0) { $productId = $values[$idx].Trim().Trim('"') }
-#         }
-#     }
-#     if ($userId) { Write-Host "    ✔ User ID from training CSV    →  $userId"    -ForegroundColor DarkGreen }
-#     if ($productId) { Write-Host "    ✔ Product ID from training CSV →  $productId" -ForegroundColor DarkGreen }
-# }
-
-# # 2. Fallback — query the feature store DB
-# if (-not $userId -or -not $productId) {
-#     if (-not $latestFSDir) { $latestFSDir = Get-LatestFSDir }
-#     if ($latestFSDir) {
-#         $fsDb9 = Join-Path $latestFSDir "features.db"
-#         if (-not $userId) {
-#             $fsU = @(Query-SQLite $fsDb9 "SELECT DISTINCT customer_unique_id FROM user_features LIMIT 1;")
-#             if ($fsU.Count -gt 0) {
-#                 $userId = $fsU[0].Trim()
-#                 Write-Host "    ✔ User ID from feature store DB →  $userId" -ForegroundColor DarkYellow
-#             }
-#         }
-#         if (-not $productId) {
-#             $fsP = @(Query-SQLite $fsDb9 "SELECT DISTINCT product_id FROM item_features LIMIT 1;")
-#             if ($fsP.Count -gt 0) {
-#                 $productId = $fsP[0].Trim()
-#                 Write-Host "    ✔ Product ID from feature store →  $productId" -ForegroundColor DarkYellow
-#             }
-#         }
-#     }
-# }
-
-# # 3. Last resort — hardcoded
-# if (-not $userId) {
-#     $userId = "012755131a5b785b0ae3291c339a9051"
-#     Write-Host "    ⚠  Could not resolve user ID — using hardcoded fallback: $userId" -ForegroundColor DarkYellow
-# }
-# if (-not $productId) {
-#     $productId = "product_id_123"
-#     Write-Host "    ⚠  Could not resolve product ID — using hardcoded fallback: $productId" -ForegroundColor DarkYellow
-# }
-
-# # 9.3 — NMF top-5
-# Write-Host ""
-# Write-Host "  [9.3] NMF  — top-5 recommendations  (user: $userId) …" -ForegroundColor White
-# $ok = Invoke-Step "python -m models.predict --user-id `"$userId`" --model NMF --top-k 5"
-# $t9Pass = $t9Pass -and $ok
-
-# # 9.4 — KNN top-10
-# Write-Host ""
-# Write-Host "  [9.4] KNN  — top-10 recommendations  (user: $userId) …" -ForegroundColor White
-# $ok = Invoke-Step "python -m models.predict --user-id `"$userId`" --model KNN --top-k 10"
-# $t9Pass = $t9Pass -and $ok
-
-# # 9.5 — Content-Based top-5
-# Write-Host ""
-# Write-Host "  [9.5] Content-Based  — top-5 recommendations  (user: $userId) …" -ForegroundColor White
-# $ok = Invoke-Step "python -m models.predict --user-id `"$userId`" --model Content --top-k 5"
-# $t9Pass = $t9Pass -and $ok
-
-# # 9.6 — Predicted rating for one product
-# Write-Host ""
-# Write-Host "  [9.6] NMF predicted rating  (user: $userId  |  product: $productId) …" -ForegroundColor White
-# $ok = Invoke-Step "python -m models.predict --user-id `"$userId`" --product-id `"$productId`" --model NMF"
-# $t9Pass = $t9Pass -and $ok
-
 Write-Status $t9Pass "Task 9 – Model Training & Prediction"
-Add-Result "9 – Model Training & Pred" "feature_store training set" "Trained models (NMF/KNN/Content), recommendation lists, rating predictions" $t9Pass
+Add-Result "9 – Model Training & Pred" "feature_store training set" "Trained models (KNN), recommendation lists, rating predictions" $t9Pass
 
 # ═════════════════════════════════════════════════════════════════════════════
 #  FINAL SUMMARY TABLE

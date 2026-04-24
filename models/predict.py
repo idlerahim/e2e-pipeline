@@ -5,8 +5,8 @@ RocoMart Model Prediction Script
 Make predictions using trained recommendation models from MLflow.
 
 Usage:
-    python models/predict.py --user-id [USER_ID] --product-id [PRODUCT_ID] --model NMF
-    python models/predict.py --user-id [USER_ID] --top-k 5 --model KNN
+    python models/predict.py --user-id [USER_ID]
+    python models/predict.py --user-id [USER_ID] --top-k 5
 """
 
 import os

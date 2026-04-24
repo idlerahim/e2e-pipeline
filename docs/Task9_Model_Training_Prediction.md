@@ -75,12 +75,15 @@ This task implements model training and evaluation for the RocoMart recommendati
 
 ## Target Models
 
-We target one primary recommendation model:
+We target a **Fallback Hybrid Recommendation System** combining two approaches:
 
-1. **KNN (K-Nearest Neighbors)** - Memory-based Category User-User collaborative filtering
-
+1. **KNN (K-Nearest Neighbors)** - Memory-based Category User-User collaborative filtering (Primary)
    - Strengths: Interpretable, leverages user affinity to specific product categories, handles zero-shot recommendations well across item spaces.
    - Use case: Category-level personalized recommendations based on neighbor interactions.
+
+2. **Global Popularity Model** - (Fallback)
+   - Strengths: Solves the "cold start" and "unseen category" problem by recommending globally popular items across the marketplace.
+   - Use case: Activated dynamically via the inference API when a user queries completely unknown or unseen categories.
 
 ## Implementation
 
@@ -243,6 +246,12 @@ Invoke-RestMethod -Uri "http://127.0.0.1:8000/recommend-categories" -Method Post
 ```powershell
 Invoke-RestMethod -Uri "http://127.0.0.1:8000/recommend-categories" -Method Post -ContentType "application/json" -Body '{"categories": ["music", "party_supplies", "toys"], "n_items": 5}' | ConvertTo-Json -Depth 5
 ```
+
+**Group 4: Unknown Category (Fallback Hybrid)**
+```powershell
+Invoke-RestMethod -Uri "http://127.0.0.1:8000/recommend-categories" -Method Post -ContentType "application/json" -Body '{"categories": ["smoking"], "n_items": 5}' | ConvertTo-Json -Depth 5
+```
+*(This gracefully falls back to the top globally popular items instead of returning an empty list)*
 
 #### Using Browser URLs (GET)
 

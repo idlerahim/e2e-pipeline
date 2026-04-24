@@ -25,6 +25,8 @@ class ModelCache:
     prod_cat_map = None
     run_id = None
     loaded = False
+    top_global_categories = None
+    global_probabilities = None
 
 cache = ModelCache()
 
@@ -64,6 +66,12 @@ def init_model():
             cat_col = 'product_category_name'
             
         cache.prod_cat_map = dict(zip(products_df['product_id'], products_df[cat_col]))
+        
+        # Compute global probabilities for popularity fallback (hybrid approach)
+        purchase_counts = (cache.user_item_grid > 0).sum()
+        cache.global_probabilities = (purchase_counts / len(cache.user_item_grid)) * 100
+        cache.top_global_categories = purchase_counts.sort_values(ascending=False).index.tolist()
+        
         cache.run_id = run_id
         cache.loaded = True
         print("Initialization complete! Ready to serve predictions.")
@@ -156,21 +164,24 @@ def get_recommendations_for_categories(user_selections, n_items=10, exclude_item
             valid_selections.append(cat)
             
     if not valid_selections:
-        return []
-
-    # KNN distances
-    k = 100
-    distances, indices = cache.model.kneighbors(my_profile, n_neighbors=min(k, len(cache.user_item_grid)))
-    
-    neighbor_indices = cache.user_item_grid.iloc[indices[0]].index
-    neighbor_data = cache.user_item_grid.loc[neighbor_indices]
-    
-    purchase_counts = (neighbor_data > 0).sum()
-    probabilities = (purchase_counts / len(neighbor_indices)) * 100
-    
-    recommendations = probabilities.drop(labels=valid_selections, errors='ignore').sort_values(ascending=False)
-    
-    top_categories = recommendations.head(n_items * 2).index.tolist()
+        # Hybrid Model Fallback: Use popular categories if input is completely unknown
+        print("No valid input categories found, falling back to Popular Categories Hybrid...")
+        top_categories = cache.top_global_categories[:n_items * 2]
+        probabilities = cache.global_probabilities
+    else:
+        # KNN distances
+        k = 100
+        distances, indices = cache.model.kneighbors(my_profile, n_neighbors=min(k, len(cache.user_item_grid)))
+        
+        neighbor_indices = cache.user_item_grid.iloc[indices[0]].index
+        neighbor_data = cache.user_item_grid.loc[neighbor_indices]
+        
+        purchase_counts = (neighbor_data > 0).sum()
+        probabilities = (purchase_counts / len(neighbor_indices)) * 100
+        
+        recommendations = probabilities.drop(labels=valid_selections, errors='ignore').sort_values(ascending=False)
+        
+        top_categories = recommendations.head(n_items * 2).index.tolist()
     
     final_recs = []
     for cat in top_categories:
