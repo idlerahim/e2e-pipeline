@@ -190,15 +190,10 @@ def train_knn_model(all_data_df, train_df, test_df):
         merged_all = pd.merge(all_data_df, products_df[['product_id', cat_col]], on='product_id', how='left')
         merged_all[cat_col] = merged_all[cat_col].fillna('unknown')
 
-        # Filter users with 2 or more distinct categories
-        user_cat_counts = merged_all.groupby('customer_unique_id')[cat_col].nunique()
-        multi_cat_users = user_cat_counts[user_cat_counts >= 2].index
-        merged_filtered = merged_all[merged_all['customer_unique_id'].isin(multi_cat_users)]
-
-        print(f"Users with 2+ categories: {merged_filtered['customer_unique_id'].nunique()}")
+        print(f"Total Users in Training: {merged_all['customer_unique_id'].nunique()}")
 
         # Pivot
-        user_item_grid = merged_filtered.pivot_table(
+        user_item_grid = merged_all.pivot_table(
             index='customer_unique_id', 
             columns=cat_col, 
             values='rating'
