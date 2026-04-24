@@ -87,7 +87,7 @@ def get_recommendations_for_user(user_id, n_items=10, exclude_items=None):
         raise RuntimeError("Model is not loaded.")
         
     if user_id not in cache.user_item_grid.index:
-        return [] # Cold start: return empty list or fallback to popular items
+        return [], "none" # Cold start: return empty list or fallback to popular items
         
     if exclude_items is None:
         exclude_items = []
@@ -145,7 +145,7 @@ def get_recommendations_for_user(user_id, n_items=10, exclude_items=None):
         if len(unique_recs) >= n_items:
             break
             
-    return unique_recs
+    return unique_recs, "KNN"
 
 def get_recommendations_for_categories(user_selections, n_items=10, exclude_items=None):
     """Core recommendation logic for a list of input categories."""
@@ -168,6 +168,7 @@ def get_recommendations_for_categories(user_selections, n_items=10, exclude_item
         print("No valid input categories found, falling back to Popular Categories Hybrid...")
         top_categories = cache.top_global_categories[:n_items * 2]
         probabilities = cache.global_probabilities
+        rec_type = "rank_based"
     else:
         # KNN distances
         k = 100
@@ -182,6 +183,7 @@ def get_recommendations_for_categories(user_selections, n_items=10, exclude_item
         recommendations = probabilities.drop(labels=valid_selections, errors='ignore').sort_values(ascending=False)
         
         top_categories = recommendations.head(n_items * 2).index.tolist()
+        rec_type = "KNN"
     
     final_recs = []
     for cat in top_categories:
@@ -211,7 +213,7 @@ def get_recommendations_for_categories(user_selections, n_items=10, exclude_item
         if len(unique_recs) >= n_items:
             break
             
-    return unique_recs
+    return unique_recs, rec_type
 
 @app.route('/', methods=['GET'])
 def index():
@@ -264,9 +266,11 @@ def recommend():
     exclude_items = data.get('exclude_items', [])
     
     try:
-        recs = get_recommendations_for_user(user_id, n_items, exclude_items)
+        recs, rec_type = get_recommendations_for_user(user_id, n_items, exclude_items)
         return jsonify({
             "user_id": user_id,
+            "model_version": cache.run_id,
+            "recommendation_type": rec_type,
             "recommendations": recs,
             "count": len(recs),
             "timestamp": datetime.now().isoformat()
@@ -299,9 +303,11 @@ def recommend_categories():
             return jsonify({"error": "'categories' must be a list of strings"}), 400
     
     try:
-        recs = get_recommendations_for_categories(categories, n_items, exclude_items)
+        recs, rec_type = get_recommendations_for_categories(categories, n_items, exclude_items)
         return jsonify({
             "input_categories": categories,
+            "model_version": cache.run_id,
+            "recommendation_type": rec_type,
             "recommendations": recs,
             "count": len(recs),
             "timestamp": datetime.now().isoformat()
@@ -329,9 +335,14 @@ def recommend_batch():
     results = {}
     try:
         for uid in user_ids:
-            results[uid] = get_recommendations_for_user(uid, n_items)
+            recs, rec_type = get_recommendations_for_user(uid, n_items)
+            results[uid] = {
+                "recommendations": recs,
+                "recommendation_type": rec_type
+            }
             
         return jsonify({
+            "model_version": cache.run_id,
             "recommendations": results,
             "user_count": len(user_ids),
             "timestamp": datetime.now().isoformat()

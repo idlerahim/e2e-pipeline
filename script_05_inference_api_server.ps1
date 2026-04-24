@@ -4,22 +4,11 @@
 
 $ErrorActionPreference = "Stop"
 
-# ── Helpers ──────────────────────────────────────────────────
-function Write-Header($msg) {
-    Write-Host ""
-    Write-Host "═══════════════════════════════════════════════" -ForegroundColor Cyan
-    Write-Host "  $msg" -ForegroundColor Cyan
-    Write-Host "═══════════════════════════════════════════════" -ForegroundColor Cyan
-}
-
 function Write-OK($msg) {
     Write-Host "  ✔ $msg" -ForegroundColor Green
 }
 
-# ════════════════════════════════════════════════════════════
 # STEP 1 — Launch Inference API in a new window
-# ════════════════════════════════════════════════════════════
-Write-Header "Launching RocoMart Inference API"
 
 # We wrap the command in a script block for the new window
 $apiScript = @'
@@ -37,18 +26,24 @@ $encodedApi = [Convert]::ToBase64String([Text.Encoding]::Unicode.GetBytes($apiSc
 # Start the process in a new window (-NoExit keeps it open if the process crashes/finishes)
 Start-Process powershell -ArgumentList "-NoExit", "-EncodedCommand", $encodedApi
 
-Write-OK "Inference API window launched."
-
 # ════════════════════════════════════════════════════════════
 # Done!
 # ════════════════════════════════════════════════════════════
 Write-Host ""
 Write-Host "╔═══════════════════════════════════════════════════════╗" -ForegroundColor Green
-Write-Host "║   ✔  Inference API Setup Initiated!                   ║" -ForegroundColor Green
+Write-Host "║   ✔   Inference API Setup Initiated!                  ║" -ForegroundColor Green
 Write-Host "╠═══════════════════════════════════════════════════════╣" -ForegroundColor Green
 Write-Host "║                                                       ║" -ForegroundColor Green
 Write-Host "║  API Status   → running in New Window                 ║" -ForegroundColor Green
 Write-Host "║  Endpoint     → http://localhost:8000                 ║" -ForegroundColor Green
 Write-Host "║                                                       ║" -ForegroundColor Green
 Write-Host "╚═══════════════════════════════════════════════════════╝" -ForegroundColor Green
-Write-Host ""
+
+#Examples
+Write-Host "`nGroup 1: Single Category: http://127.0.0.1:8000/recommend-categories?category=air_conditioning&n_items=5"
+
+Write-Host "`nGroup 2: Two Categories: http://127.0.0.1:8000/recommend-categories?category=air_conditioning&category=bed_bath_table&n_items=5"
+
+Write-Host "`nGroup 3: Multiple Categories: http://127.0.0.1:8000/recommend-categories?category=music&category=party_supplies&category=toys&n_items=5"
+
+Write-Host "`nGroup 4: Unknown Category (Rank Based): http://127.0.0.1:8000/recommend-categories?category=commercial_appliance&n_items=5"

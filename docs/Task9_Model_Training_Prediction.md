@@ -249,7 +249,7 @@ Invoke-RestMethod -Uri "http://127.0.0.1:8000/recommend-categories" -Method Post
 
 **Group 4: Unknown Category (Fallback Hybrid)**
 ```powershell
-Invoke-RestMethod -Uri "http://127.0.0.1:8000/recommend-categories" -Method Post -ContentType "application/json" -Body '{"categories": ["smoking"], "n_items": 5}' | ConvertTo-Json -Depth 5
+Invoke-RestMethod -Uri "http://127.0.0.1:8000/recommend-categories" -Method Post -ContentType "application/json" -Body '{"categories": ["commercial_appliance"], "n_items": 5}' | ConvertTo-Json -Depth 5
 ```
 *(This gracefully falls back to the top globally popular items instead of returning an empty list)*
 
