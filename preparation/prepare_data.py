@@ -382,7 +382,8 @@ def run_preparation(config_path: str = None):
     raw_layer = os.path.join(project_root, cfg["paths"]["raw_layer"])
     curated_dir = ensure_directory(os.path.join(project_root, "data_lake", "curated", "prepared",
                                                  datetime.now().strftime("%Y-%m-%d")))
-    plots_dir = ensure_directory(os.path.join(project_root, "reports", "eda_plots"))
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    plots_dir = ensure_directory(os.path.join(project_root, "reports", f"{ts}_eda_plots"))
 
     logger.info("=" * 70)
     logger.info("DATA PREPARATION & EDA - START")
@@ -445,7 +446,7 @@ def run_preparation(config_path: str = None):
         "avg_review_score": round(float(txn[txn["review_score"] > 0]["review_score"].mean()), 2),
         "date_range": f"{txn['order_purchase_timestamp'].min()} to {txn['order_purchase_timestamp'].max()}",
     }
-    stats_path = os.path.join(curated_dir, "preparation_summary.json")
+    stats_path = os.path.join(curated_dir, f"{ts}_preparation_summary.json")
     with open(stats_path, "w") as f:
         json.dump(stats, f, indent=2, default=str)
     logger.info(f"    Summary: {stats_path}")

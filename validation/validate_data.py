@@ -453,13 +453,13 @@ def run_validation(config_path: str = None):
 
     # Save JSON report
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    json_path = os.path.join(reports_dir, f"data_quality_report_{ts}.json")
+    json_path = os.path.join(reports_dir, f"{ts}_data_quality_report.json")
     with open(json_path, "w", encoding="utf-8") as f:
         json.dump(all_reports, f, indent=2, default=str)
     logger.info(f"  JSON report: {json_path}")
 
     # Save Markdown report
-    md_path = os.path.join(reports_dir, f"data_quality_report_{ts}.md")
+    md_path = os.path.join(reports_dir, f"{ts}_data_quality_report.md")
     generate_markdown_report(all_reports, md_path)
     logger.info(f"  Markdown report: {md_path}")
 

@@ -112,7 +112,7 @@ $summary = @(
     [PSCustomObject]@{ N = 4; Summary = "Data Validation        Schema, type & quality checks on raw data" },
     [PSCustomObject]@{ N = 5; Summary = "Data Preparation       Clean, merge & produce train/test splits" },
     [PSCustomObject]@{ N = 6; Summary = "Feature Engineering    Build user, item & interaction feature sets" },
-    [PSCustomObject]@{ N = 7; Summary = "Feature Store          Register snapshot, query features, build training sets (PIT + dynamic IDs)" },
+    [PSCustomObject]@{ N = 7; Summary = "Feature Store          Register snapshot, query features, build training sets" },
     [PSCustomObject]@{ N = 8; Summary = "Data Versioning        Informational note  (model versioning skipped)" },
     [PSCustomObject]@{ N = 9; Summary = "Model Training & Pred  Train KNN" }
 )

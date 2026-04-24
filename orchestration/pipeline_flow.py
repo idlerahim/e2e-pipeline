@@ -191,7 +191,7 @@ def generate_pipeline_report(stage_results: list[dict]) -> str:
     project_root = get_project_root()
     reports_dir = project_root / "reports"
     reports_dir.mkdir(parents=True, exist_ok=True)
-    report_path = reports_dir / f"pipeline_execution_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
+    report_path = reports_dir / f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_pipeline_execution.md"
 
     completed = sum(1 for r in stage_results if r["status"] == "SUCCESS")
     total = len(stage_results)

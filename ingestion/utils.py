@@ -94,9 +94,11 @@ def setup_logger(
     logs_dir = os.path.join(project_root, cfg["paths"]["logs_dir"])
     ensure_directory(logs_dir)
 
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
     if log_filename is None:
-        today = datetime.now().strftime("%Y%m%d")
-        log_filename = f"{prefix}_{today}.log"
+        log_filename = f"{ts}_{prefix}.log"
+    else:
+        log_filename = f"{ts}_{log_filename}"
 
     log_path = os.path.join(logs_dir, log_filename)
 

@@ -283,7 +283,8 @@ def train_knn_model(all_data_df, train_df, test_df):
 
 def create_performance_report(results):
     """Create a comprehensive performance report with ranking metrics."""
-    report_path = "reports/model_performance_report.md"
+    ts = datetime.now().strftime("%Y%m%d_%H%M%S")
+    report_path = f"reports/{ts}_model_performance_report.md"
 
     with open(report_path, 'w') as f:
         f.write("# Model Performance Report\n\n")
