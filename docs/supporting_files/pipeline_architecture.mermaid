@@ -1,0 +1,43 @@
+---
+config:
+  layout: fixed
+---
+flowchart LR
+    A1[("CSV")] --> B1["Ingestion"]
+    C1[("Data Lake")] --> D1{"Validation"}
+    D1 -- Fail --> F1["Alerts"]
+    E1["Preparation"] --> G1["Feature Engineering"]
+    G1 --> H1[("Feature Store (DVC)")]
+    H1 --> I1["Training (KNN)"]
+    I1 --> J1["Evaluation"]
+    I1 -.-> K1[("MLflow Tracking")]
+    J1 -.-> K1
+    K1 --> L1["Flask API"]
+    n1[("API")] --> B1
+    B1 --> C1
+    D1 -- Pass --> E1
+    L1 --> n3["Live Inferences"] & n4["Rank Based for Unseen Data"] & n2["Batch Recommendations"]
+
+    n3@{ shape: rounded}
+    n4@{ shape: rounded}
+    n2@{ shape: rounded}
+     A1:::data
+     B1:::process
+     C1:::data
+     D1:::process
+     E1:::process
+     G1:::process
+     H1:::data
+     I1:::model
+     J1:::model
+     K1:::data
+     L1:::serving
+     n1:::data
+     n3:::serving
+     n4:::serving
+     n2:::serving
+    classDef orchestration fill:#f8fafc,stroke:#4f46e5,stroke-width:2px,stroke-dasharray: 4 4
+    classDef data fill:#10b981,stroke:#047857,color:#fff
+    classDef process fill:#f59e0b,stroke:#b45309,color:#fff
+    classDef model fill:#8b5cf6,stroke:#5b21b6,color:#fff
+    classDef serving fill:#3b82f6,stroke:#1d4ed8,color:#fff
