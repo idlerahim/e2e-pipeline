@@ -1,0 +1,40 @@
+2026-04-25 09:31:19 | INFO     | transformation | ======================================================================
+2026-04-25 09:31:19 | INFO     | transformation | FEATURE ENGINEERING - START
+2026-04-25 09:31:19 | INFO     | transformation |   Timestamp : 2026-04-25T09:31:19.939051
+2026-04-25 09:31:19 | INFO     | transformation |   Input     : D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake\curated\prepared\2026-04-25
+2026-04-25 09:31:19 | INFO     | transformation |   Output    : D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake\curated\features\2026-04-25
+2026-04-25 09:31:19 | INFO     | transformation | ======================================================================
+2026-04-25 09:31:19 | INFO     | transformation | [1] Loading prepared datasets...
+2026-04-25 09:31:21 | INFO     | transformation |     Transactions: 113,314 rows
+2026-04-25 09:31:21 | INFO     | transformation |     Interactions: 98,892 rows
+2026-04-25 09:31:21 | INFO     | transformation |     Products: 32,951 rows
+2026-04-25 09:31:21 | INFO     | transformation | [2] Building user features...
+2026-04-25 09:31:21 | INFO     | transformation |   [USER] Aggregating user features...
+2026-04-25 09:32:04 | INFO     | transformation |     -> 95,378 users, 16 features
+2026-04-25 09:32:04 | INFO     | transformation | [3] Building item features...
+2026-04-25 09:32:04 | INFO     | transformation |   [ITEM] Aggregating item features...
+2026-04-25 09:32:13 | INFO     | transformation |     -> 32,951 items, 28 features
+2026-04-25 09:32:13 | INFO     | transformation | [4] Building interaction features...
+2026-04-25 09:32:13 | INFO     | transformation |   [INTERACTION] Building interaction features...
+2026-04-25 09:32:13 | INFO     | transformation |     -> 98,892 interactions, 7 features
+2026-04-25 09:32:13 | INFO     | transformation | [5] Building feature registry...
+2026-04-25 09:32:13 | INFO     | transformation |     33 features registered
+2026-04-25 09:32:13 | INFO     | transformation | [6] Saving feature CSVs...
+2026-04-25 09:32:15 | INFO     | transformation |     Feature registry: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake\curated\features\2026-04-25\feature_registry.json
+2026-04-25 09:32:15 | INFO     | transformation | [7] Loading into SQLite database...
+2026-04-25 09:32:15 | INFO     | transformation |   [SQLITE] Loading features into: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake\curated\features\2026-04-25\features.db
+2026-04-25 09:32:15 | INFO     | transformation |     user_features: 95,378 rows
+2026-04-25 09:32:15 | INFO     | transformation |     item_features: 32,951 rows
+2026-04-25 09:32:16 | INFO     | transformation |     interaction_features: 98,892 rows
+2026-04-25 09:32:16 | INFO     | transformation |     feature_registry: 33 entries
+2026-04-25 09:32:16 | INFO     | transformation |     Indexes created
+2026-04-25 09:32:16 | INFO     | transformation |     SQLite database saved successfully
+2026-04-25 09:32:16 | INFO     | transformation | [8] Generating feature logic summary...
+2026-04-25 09:32:16 | INFO     | transformation |     Feature summary: D:\Data\Portfolio\Projects\Python\e2e-pipeline\reports\feature_logic_summary.md
+2026-04-25 09:32:16 | INFO     | transformation | ======================================================================
+2026-04-25 09:32:16 | INFO     | transformation | FEATURE ENGINEERING - COMPLETE
+2026-04-25 09:32:16 | INFO     | transformation |   User features        : 95,378 rows x 16 cols
+2026-04-25 09:32:16 | INFO     | transformation |   Item features        : 32,951 rows x 28 cols
+2026-04-25 09:32:16 | INFO     | transformation |   Interaction features : 98,892 rows x 7 cols
+2026-04-25 09:32:16 | INFO     | transformation |   SQLite DB            : D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake\curated\features\2026-04-25\features.db
+2026-04-25 09:32:16 | INFO     | transformation | ======================================================================

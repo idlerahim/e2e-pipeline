@@ -1,0 +1,19 @@
+2026-04-25 09:30:59 | INFO     | storage_manager |   Layer 'raw' -> D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake\raw  (Unprocessed data exactly as ingested from sources)
+2026-04-25 09:30:59 | INFO     | storage_manager |   Layer 'staging' -> D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake\staging  (Validated and lightly cleaned data (post-quality checks))
+2026-04-25 09:30:59 | INFO     | storage_manager |   Layer 'curated' -> D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake\curated  (Fully cleaned, transformed, feature-engineered data)
+2026-04-25 09:30:59 | INFO     | storage_manager |   Layer 'serving' -> D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake\serving  (Model-ready features and inference outputs)
+2026-04-25 09:30:59 | INFO     | storage_manager |   Catalog built: 18 files found in raw layer
+2026-04-25 09:30:59 | INFO     | storage_manager |   Layer 'raw' -> D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake\raw  (Unprocessed data exactly as ingested from sources)
+2026-04-25 09:30:59 | INFO     | storage_manager |   Layer 'staging' -> D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake\staging  (Validated and lightly cleaned data (post-quality checks))
+2026-04-25 09:30:59 | INFO     | storage_manager |   Layer 'curated' -> D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake\curated  (Fully cleaned, transformed, feature-engineered data)
+2026-04-25 09:30:59 | INFO     | storage_manager |   Layer 'serving' -> D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake\serving  (Model-ready features and inference outputs)
+2026-04-25 09:30:59 | INFO     | storage_manager |   Catalog built: 18 files found in raw layer
+2026-04-25 09:31:00 | INFO     | storage_manager |   [OK] MATCH  customers\csv\2026-04-25\olist_customers_dataset.csv
+2026-04-25 09:31:00 | INFO     | storage_manager |   [OK] MATCH  geolocation\csv\2026-04-25\olist_geolocation_dataset.csv
+2026-04-25 09:31:00 | INFO     | storage_manager |   [OK] MATCH  orders\csv\2026-04-25\olist_orders_dataset.csv
+2026-04-25 09:31:00 | INFO     | storage_manager |   [OK] MATCH  order_items\csv\2026-04-25\olist_order_items_dataset.csv
+2026-04-25 09:31:00 | INFO     | storage_manager |   [OK] MATCH  order_payments\csv\2026-04-25\olist_order_payments_dataset.csv
+2026-04-25 09:31:00 | INFO     | storage_manager |   [OK] MATCH  order_reviews\csv\2026-04-25\olist_order_reviews_dataset.csv
+2026-04-25 09:31:00 | INFO     | storage_manager |   [OK] MATCH  products\csv\2026-04-25\olist_products_dataset.csv
+2026-04-25 09:31:00 | INFO     | storage_manager |   [OK] MATCH  product_category_name_translation\csv\2026-04-25\product_category_name_translation.csv
+2026-04-25 09:31:00 | INFO     | storage_manager |   [OK] MATCH  sellers\csv\2026-04-25\olist_sellers_dataset.csv

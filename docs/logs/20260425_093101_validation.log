@@ -1,0 +1,116 @@
+2026-04-25 09:31:01 | INFO     | validation | ======================================================================
+2026-04-25 09:31:01 | INFO     | validation | DATA PROFILING & VALIDATION - START
+2026-04-25 09:31:01 | INFO     | validation |   Timestamp : 2026-04-25T09:31:01.192602
+2026-04-25 09:31:01 | INFO     | validation |   Raw layer  : D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw
+2026-04-25 09:31:01 | INFO     | validation |   Source     : D:\Data\Portfolio\Projects\Python\e2e-pipeline\dataset
+2026-04-25 09:31:01 | INFO     | validation | ======================================================================
+2026-04-25 09:31:01 | INFO     | validation | Using latest ingested raw file: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\customers\csv\2026-04-25\olist_customers_dataset.csv
+2026-04-25 09:31:01 | INFO     | validation | --------------------------------------------------
+2026-04-25 09:31:01 | INFO     | validation | Validating: olist_customers_dataset.csv
+2026-04-25 09:31:01 | INFO     | validation |   Reading: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\customers\csv\2026-04-25\olist_customers_dataset.csv
+2026-04-25 09:31:01 | INFO     | validation |   Shape: 99,441 rows x 5 columns
+2026-04-25 09:31:01 | INFO     | validation |     [SCHEMA] PASS: All expected columns present
+2026-04-25 09:31:01 | INFO     | validation |     [MISSING] Overall completeness: 100.0%  (0 missing cells)
+2026-04-25 09:31:01 | INFO     | validation |     [DUPLICATES] PASS: 0 full-row duplicates found
+2026-04-25 09:31:01 | INFO     | validation |     [DUPLICATES] PASS: 0 duplicate values in 'customer_id'
+2026-04-25 09:31:01 | INFO     | validation |   -> Overall: PASS
+2026-04-25 09:31:01 | INFO     | validation | Using latest ingested raw file: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\products\csv\2026-04-25\olist_products_dataset.csv
+2026-04-25 09:31:01 | INFO     | validation | --------------------------------------------------
+2026-04-25 09:31:01 | INFO     | validation | Validating: olist_products_dataset.csv
+2026-04-25 09:31:01 | INFO     | validation |   Reading: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\products\csv\2026-04-25\olist_products_dataset.csv
+2026-04-25 09:31:01 | INFO     | validation |   Shape: 32,951 rows x 9 columns
+2026-04-25 09:31:01 | INFO     | validation |     [SCHEMA] PASS: All expected columns present
+2026-04-25 09:31:01 | INFO     | validation |     [MISSING] Overall completeness: 99.17%  (2,448 missing cells)
+2026-04-25 09:31:01 | INFO     | validation |     [DUPLICATES] PASS: 0 full-row duplicates found
+2026-04-25 09:31:01 | INFO     | validation |     [DUPLICATES] PASS: 0 duplicate values in 'product_id'
+2026-04-25 09:31:01 | INFO     | validation |     [RANGE] PASS: 'product_photos_qty' expected [0, 50]: 0 below, 0 above
+2026-04-25 09:31:01 | INFO     | validation |     [RANGE] PASS: 'product_weight_g' expected [0, 200000]: 0 below, 0 above
+2026-04-25 09:31:01 | INFO     | validation |     [RANGE] PASS: 'product_length_cm' expected [0, 200]: 0 below, 0 above
+2026-04-25 09:31:01 | INFO     | validation |     [RANGE] PASS: 'product_height_cm' expected [0, 200]: 0 below, 0 above
+2026-04-25 09:31:01 | INFO     | validation |     [RANGE] PASS: 'product_width_cm' expected [0, 200]: 0 below, 0 above
+2026-04-25 09:31:01 | INFO     | validation |   -> Overall: PASS
+2026-04-25 09:31:01 | INFO     | validation | Using latest ingested raw file: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\orders\csv\2026-04-25\olist_orders_dataset.csv
+2026-04-25 09:31:01 | INFO     | validation | --------------------------------------------------
+2026-04-25 09:31:01 | INFO     | validation | Validating: olist_orders_dataset.csv
+2026-04-25 09:31:01 | INFO     | validation |   Reading: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\orders\csv\2026-04-25\olist_orders_dataset.csv
+2026-04-25 09:31:02 | INFO     | validation |   Shape: 99,441 rows x 8 columns
+2026-04-25 09:31:02 | INFO     | validation |     [SCHEMA] PASS: All expected columns present
+2026-04-25 09:31:02 | INFO     | validation |     [MISSING] Overall completeness: 99.38%  (4,908 missing cells)
+2026-04-25 09:31:02 | INFO     | validation |     [DUPLICATES] PASS: 0 full-row duplicates found
+2026-04-25 09:31:02 | INFO     | validation |     [DUPLICATES] PASS: 0 duplicate values in 'order_id'
+2026-04-25 09:31:02 | INFO     | validation |     [VALUES] PASS: 'order_status' all values valid
+2026-04-25 09:31:02 | INFO     | validation |   -> Overall: PASS
+2026-04-25 09:31:02 | INFO     | validation | Using latest ingested raw file: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\order_items\csv\2026-04-25\olist_order_items_dataset.csv
+2026-04-25 09:31:02 | INFO     | validation | --------------------------------------------------
+2026-04-25 09:31:02 | INFO     | validation | Validating: olist_order_items_dataset.csv
+2026-04-25 09:31:02 | INFO     | validation |   Reading: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\order_items\csv\2026-04-25\olist_order_items_dataset.csv
+2026-04-25 09:31:03 | INFO     | validation |   Shape: 112,650 rows x 7 columns
+2026-04-25 09:31:03 | INFO     | validation |     [SCHEMA] PASS: All expected columns present
+2026-04-25 09:31:03 | INFO     | validation |     [MISSING] Overall completeness: 100.0%  (0 missing cells)
+2026-04-25 09:31:03 | INFO     | validation |     [DUPLICATES] PASS: 0 full-row duplicates found
+2026-04-25 09:31:03 | INFO     | validation |     [RANGE] PASS: 'price' expected [0, 100000]: 0 below, 0 above
+2026-04-25 09:31:03 | INFO     | validation |     [RANGE] PASS: 'freight_value' expected [0, 10000]: 0 below, 0 above
+2026-04-25 09:31:03 | INFO     | validation |     [RANGE] PASS: 'order_item_id' expected [1, 50]: 0 below, 0 above
+2026-04-25 09:31:03 | INFO     | validation |   -> Overall: PASS
+2026-04-25 09:31:03 | INFO     | validation | Using latest ingested raw file: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\order_reviews\csv\2026-04-25\olist_order_reviews_dataset.csv
+2026-04-25 09:31:03 | INFO     | validation | --------------------------------------------------
+2026-04-25 09:31:03 | INFO     | validation | Validating: olist_order_reviews_dataset.csv
+2026-04-25 09:31:03 | INFO     | validation |   Reading: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\order_reviews\csv\2026-04-25\olist_order_reviews_dataset.csv
+2026-04-25 09:31:03 | INFO     | validation |   Shape: 99,224 rows x 7 columns
+2026-04-25 09:31:03 | INFO     | validation |     [SCHEMA] PASS: All expected columns present
+2026-04-25 09:31:04 | INFO     | validation |     [MISSING] Overall completeness: 78.99%  (145,903 missing cells)
+2026-04-25 09:31:04 | INFO     | validation |     [DUPLICATES] PASS: 0 full-row duplicates found
+2026-04-25 09:31:04 | INFO     | validation |     [RANGE] PASS: 'review_score' expected [1, 5]: 0 below, 0 above
+2026-04-25 09:31:04 | INFO     | validation |   -> Overall: PASS
+2026-04-25 09:31:04 | INFO     | validation | Using latest ingested raw file: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\order_payments\csv\2026-04-25\olist_order_payments_dataset.csv
+2026-04-25 09:31:04 | INFO     | validation | --------------------------------------------------
+2026-04-25 09:31:04 | INFO     | validation | Validating: olist_order_payments_dataset.csv
+2026-04-25 09:31:04 | INFO     | validation |   Reading: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\order_payments\csv\2026-04-25\olist_order_payments_dataset.csv
+2026-04-25 09:31:04 | INFO     | validation |   Shape: 103,886 rows x 5 columns
+2026-04-25 09:31:04 | INFO     | validation |     [SCHEMA] PASS: All expected columns present
+2026-04-25 09:31:04 | INFO     | validation |     [MISSING] Overall completeness: 100.0%  (0 missing cells)
+2026-04-25 09:31:04 | INFO     | validation |     [DUPLICATES] PASS: 0 full-row duplicates found
+2026-04-25 09:31:04 | INFO     | validation |     [RANGE] PASS: 'payment_value' expected [0, 100000]: 0 below, 0 above
+2026-04-25 09:31:04 | INFO     | validation |     [RANGE] PASS: 'payment_installments' expected [0, 30]: 0 below, 0 above
+2026-04-25 09:31:04 | INFO     | validation |     [VALUES] PASS: 'payment_type' all values valid
+2026-04-25 09:31:04 | INFO     | validation |   -> Overall: PASS
+2026-04-25 09:31:04 | INFO     | validation | Using latest ingested raw file: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\sellers\csv\2026-04-25\olist_sellers_dataset.csv
+2026-04-25 09:31:04 | INFO     | validation | --------------------------------------------------
+2026-04-25 09:31:04 | INFO     | validation | Validating: olist_sellers_dataset.csv
+2026-04-25 09:31:04 | INFO     | validation |   Reading: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\sellers\csv\2026-04-25\olist_sellers_dataset.csv
+2026-04-25 09:31:04 | INFO     | validation |   Shape: 3,095 rows x 4 columns
+2026-04-25 09:31:04 | INFO     | validation |     [SCHEMA] PASS: All expected columns present
+2026-04-25 09:31:04 | INFO     | validation |     [MISSING] Overall completeness: 100.0%  (0 missing cells)
+2026-04-25 09:31:04 | INFO     | validation |     [DUPLICATES] PASS: 0 full-row duplicates found
+2026-04-25 09:31:04 | INFO     | validation |     [DUPLICATES] PASS: 0 duplicate values in 'seller_id'
+2026-04-25 09:31:04 | INFO     | validation |   -> Overall: PASS
+2026-04-25 09:31:04 | INFO     | validation | Using latest ingested raw file: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\geolocation\csv\2026-04-25\olist_geolocation_dataset.csv
+2026-04-25 09:31:04 | INFO     | validation | --------------------------------------------------
+2026-04-25 09:31:04 | INFO     | validation | Validating: olist_geolocation_dataset.csv
+2026-04-25 09:31:04 | INFO     | validation |   Reading: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\geolocation\csv\2026-04-25\olist_geolocation_dataset.csv
+2026-04-25 09:31:05 | INFO     | validation |   Shape: 1,000,163 rows x 5 columns
+2026-04-25 09:31:05 | INFO     | validation |     [SCHEMA] PASS: All expected columns present
+2026-04-25 09:31:05 | INFO     | validation |     [MISSING] Overall completeness: 100.0%  (0 missing cells)
+2026-04-25 09:31:06 | INFO     | validation |     [DUPLICATES] WARNING: 261,831 full-row duplicates found
+2026-04-25 09:31:06 | INFO     | validation |     [RANGE] PASS: 'geolocation_lat' expected [-90, 90]: 0 below, 0 above
+2026-04-25 09:31:06 | INFO     | validation |     [RANGE] PASS: 'geolocation_lng' expected [-180, 180]: 0 below, 0 above
+2026-04-25 09:31:06 | INFO     | validation |   -> Overall: WARNING
+2026-04-25 09:31:06 | INFO     | validation | Using latest ingested raw file: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\product_category_name_translation\csv\2026-04-25\product_category_name_translation.csv
+2026-04-25 09:31:06 | INFO     | validation | --------------------------------------------------
+2026-04-25 09:31:06 | INFO     | validation | Validating: product_category_name_translation.csv
+2026-04-25 09:31:06 | INFO     | validation |   Reading: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\product_category_name_translation\csv\2026-04-25\product_category_name_translation.csv
+2026-04-25 09:31:06 | INFO     | validation |   Shape: 71 rows x 2 columns
+2026-04-25 09:31:06 | INFO     | validation |     [SCHEMA] PASS: All expected columns present
+2026-04-25 09:31:06 | INFO     | validation |     [MISSING] Overall completeness: 100.0%  (0 missing cells)
+2026-04-25 09:31:06 | INFO     | validation |     [DUPLICATES] PASS: 0 full-row duplicates found
+2026-04-25 09:31:06 | INFO     | validation |     [DUPLICATES] PASS: 0 duplicate values in 'product_category_name'
+2026-04-25 09:31:06 | INFO     | validation |   -> Overall: PASS
+2026-04-25 09:31:06 | INFO     | validation |   JSON report: D:\Data\Portfolio\Projects\Python\e2e-pipeline\reports\20260425_093106_data_quality_report.json
+2026-04-25 09:31:06 | INFO     | validation |   Markdown report: D:\Data\Portfolio\Projects\Python\e2e-pipeline\reports\20260425_093106_data_quality_report.md
+2026-04-25 09:31:06 | INFO     | validation | ======================================================================
+2026-04-25 09:31:06 | INFO     | validation | DATA PROFILING & VALIDATION - COMPLETE
+2026-04-25 09:31:06 | INFO     | validation |   Total datasets : 9
+2026-04-25 09:31:06 | INFO     | validation |   PASS           : 8
+2026-04-25 09:31:06 | INFO     | validation |   WARNING        : 1
+2026-04-25 09:31:06 | INFO     | validation |   ERROR          : 0
+2026-04-25 09:31:06 | INFO     | validation | ======================================================================

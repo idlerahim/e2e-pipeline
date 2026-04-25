@@ -1,0 +1,80 @@
+{
+  "run_timestamp": "2026-04-25T09:30:59.413750",
+  "total_files": 9,
+  "success": 9,
+  "failed": 0,
+  "details": [
+    {
+      "file": "olist_customers_dataset.csv",
+      "status": "SUCCESS",
+      "rows": 99441,
+      "columns": 5,
+      "checksum": "8a2c4244856aab4bde3b8ed81f8ca251",
+      "dest_path": "D:\\Data\\Portfolio\\Projects\\Python\\e2e-pipeline\\data_lake/raw\\customers\\csv\\2026-04-25\\olist_customers_dataset.csv"
+    },
+    {
+      "file": "olist_products_dataset.csv",
+      "status": "SUCCESS",
+      "rows": 32951,
+      "columns": 9,
+      "checksum": "e935401104a3669223b83c9a01fdf5ca",
+      "dest_path": "D:\\Data\\Portfolio\\Projects\\Python\\e2e-pipeline\\data_lake/raw\\products\\csv\\2026-04-25\\olist_products_dataset.csv"
+    },
+    {
+      "file": "olist_orders_dataset.csv",
+      "status": "SUCCESS",
+      "rows": 99441,
+      "columns": 8,
+      "checksum": "8bd60e55c1ca229d9f70b62f3e72f22c",
+      "dest_path": "D:\\Data\\Portfolio\\Projects\\Python\\e2e-pipeline\\data_lake/raw\\orders\\csv\\2026-04-25\\olist_orders_dataset.csv"
+    },
+    {
+      "file": "olist_order_items_dataset.csv",
+      "status": "SUCCESS",
+      "rows": 112650,
+      "columns": 7,
+      "checksum": "f4fa76976662e9cba0633f9e49ed2645",
+      "dest_path": "D:\\Data\\Portfolio\\Projects\\Python\\e2e-pipeline\\data_lake/raw\\order_items\\csv\\2026-04-25\\olist_order_items_dataset.csv"
+    },
+    {
+      "file": "olist_order_reviews_dataset.csv",
+      "status": "SUCCESS",
+      "rows": 99224,
+      "columns": 7,
+      "checksum": "914066be00d2db0c3d857f071cff1688",
+      "dest_path": "D:\\Data\\Portfolio\\Projects\\Python\\e2e-pipeline\\data_lake/raw\\order_reviews\\csv\\2026-04-25\\olist_order_reviews_dataset.csv"
+    },
+    {
+      "file": "olist_order_payments_dataset.csv",
+      "status": "SUCCESS",
+      "rows": 103886,
+      "columns": 5,
+      "checksum": "75ce0c041d18e5f250c5cea9a8042944",
+      "dest_path": "D:\\Data\\Portfolio\\Projects\\Python\\e2e-pipeline\\data_lake/raw\\order_payments\\csv\\2026-04-25\\olist_order_payments_dataset.csv"
+    },
+    {
+      "file": "olist_sellers_dataset.csv",
+      "status": "SUCCESS",
+      "rows": 3095,
+      "columns": 4,
+      "checksum": "5b22c02facdf842d6c0aea36e1849018",
+      "dest_path": "D:\\Data\\Portfolio\\Projects\\Python\\e2e-pipeline\\data_lake/raw\\sellers\\csv\\2026-04-25\\olist_sellers_dataset.csv"
+    },
+    {
+      "file": "olist_geolocation_dataset.csv",
+      "status": "SUCCESS",
+      "rows": 1000163,
+      "columns": 5,
+      "checksum": "6d8464e41c8e2013955e437b6b4fafbd",
+      "dest_path": "D:\\Data\\Portfolio\\Projects\\Python\\e2e-pipeline\\data_lake/raw\\geolocation\\csv\\2026-04-25\\olist_geolocation_dataset.csv"
+    },
+    {
+      "file": "product_category_name_translation.csv",
+      "status": "SUCCESS",
+      "rows": 71,
+      "columns": 2,
+      "checksum": "4196d142e8f2b9697521fc50c97f626b",
+      "dest_path": "D:\\Data\\Portfolio\\Projects\\Python\\e2e-pipeline\\data_lake/raw\\product_category_name_translation\\csv\\2026-04-25\\product_category_name_translation.csv"
+    }
+  ]
+}

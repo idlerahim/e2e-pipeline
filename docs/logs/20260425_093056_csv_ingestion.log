@@ -1,0 +1,86 @@
+2026-04-25 09:30:56 | INFO     | csv_ingestion | ======================================================================
+2026-04-25 09:30:56 | INFO     | csv_ingestion | CSV BATCH INGESTION - START
+2026-04-25 09:30:56 | INFO     | csv_ingestion |   Timestamp : 2026-04-25T09:30:56.685644
+2026-04-25 09:30:56 | INFO     | csv_ingestion |   Source dir: D:\Data\Portfolio\Projects\Python\e2e-pipeline\dataset
+2026-04-25 09:30:56 | INFO     | csv_ingestion |   Raw layer : D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw
+2026-04-25 09:30:56 | INFO     | csv_ingestion |   Files     : 9
+2026-04-25 09:30:56 | INFO     | csv_ingestion | ======================================================================
+2026-04-25 09:30:56 | INFO     | csv_ingestion | --------------------------------------------------
+2026-04-25 09:30:56 | INFO     | csv_ingestion | Ingesting: olist_customers_dataset.csv  ->  source=customers
+2026-04-25 09:30:56 | INFO     | csv_ingestion |   Reading source: D:\Data\Portfolio\Projects\Python\e2e-pipeline\dataset\olist_customers_dataset.csv
+2026-04-25 09:30:56 | INFO     | csv_ingestion |   Rows=99,441  Columns=5  Cols=['customer_id', 'customer_unique_id', 'customer_zip_code_prefix', 'customer_city', 'customer_state']
+2026-04-25 09:30:56 | INFO     | csv_ingestion |   Copied to: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\customers\csv\2026-04-25\olist_customers_dataset.csv
+2026-04-25 09:30:56 | INFO     | csv_ingestion |   MD5 checksum: 8a2c4244856aab4bde3b8ed81f8ca251
+2026-04-25 09:30:56 | INFO     | csv_ingestion |   Metadata written: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\customers\csv\2026-04-25\olist_customers_dataset.csv.meta.json
+2026-04-25 09:30:56 | INFO     | csv_ingestion |   [OK] SUCCESS - olist_customers_dataset.csv
+2026-04-25 09:30:56 | INFO     | csv_ingestion | --------------------------------------------------
+2026-04-25 09:30:56 | INFO     | csv_ingestion | Ingesting: olist_products_dataset.csv  ->  source=products
+2026-04-25 09:30:56 | INFO     | csv_ingestion |   Reading source: D:\Data\Portfolio\Projects\Python\e2e-pipeline\dataset\olist_products_dataset.csv
+2026-04-25 09:30:56 | INFO     | csv_ingestion |   Rows=32,951  Columns=9  Cols=['product_id', 'product_category_name', 'product_name_lenght', 'product_description_lenght', 'product_photos_qty', 'product_weight_g', 'product_length_cm', 'product_height_cm', 'product_width_cm']
+2026-04-25 09:30:56 | INFO     | csv_ingestion |   Copied to: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\products\csv\2026-04-25\olist_products_dataset.csv
+2026-04-25 09:30:56 | INFO     | csv_ingestion |   MD5 checksum: e935401104a3669223b83c9a01fdf5ca
+2026-04-25 09:30:56 | INFO     | csv_ingestion |   Metadata written: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\products\csv\2026-04-25\olist_products_dataset.csv.meta.json
+2026-04-25 09:30:56 | INFO     | csv_ingestion |   [OK] SUCCESS - olist_products_dataset.csv
+2026-04-25 09:30:56 | INFO     | csv_ingestion | --------------------------------------------------
+2026-04-25 09:30:56 | INFO     | csv_ingestion | Ingesting: olist_orders_dataset.csv  ->  source=orders
+2026-04-25 09:30:56 | INFO     | csv_ingestion |   Reading source: D:\Data\Portfolio\Projects\Python\e2e-pipeline\dataset\olist_orders_dataset.csv
+2026-04-25 09:30:57 | INFO     | csv_ingestion |   Rows=99,441  Columns=8  Cols=['order_id', 'customer_id', 'order_status', 'order_purchase_timestamp', 'order_approved_at', 'order_delivered_carrier_date', 'order_delivered_customer_date', 'order_estimated_delivery_date']
+2026-04-25 09:30:57 | INFO     | csv_ingestion |   Copied to: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\orders\csv\2026-04-25\olist_orders_dataset.csv
+2026-04-25 09:30:57 | INFO     | csv_ingestion |   MD5 checksum: 8bd60e55c1ca229d9f70b62f3e72f22c
+2026-04-25 09:30:57 | INFO     | csv_ingestion |   Metadata written: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\orders\csv\2026-04-25\olist_orders_dataset.csv.meta.json
+2026-04-25 09:30:57 | INFO     | csv_ingestion |   [OK] SUCCESS - olist_orders_dataset.csv
+2026-04-25 09:30:57 | INFO     | csv_ingestion | --------------------------------------------------
+2026-04-25 09:30:57 | INFO     | csv_ingestion | Ingesting: olist_order_items_dataset.csv  ->  source=order_items
+2026-04-25 09:30:57 | INFO     | csv_ingestion |   Reading source: D:\Data\Portfolio\Projects\Python\e2e-pipeline\dataset\olist_order_items_dataset.csv
+2026-04-25 09:30:57 | INFO     | csv_ingestion |   Rows=112,650  Columns=7  Cols=['order_id', 'order_item_id', 'product_id', 'seller_id', 'shipping_limit_date', 'price', 'freight_value']
+2026-04-25 09:30:57 | INFO     | csv_ingestion |   Copied to: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\order_items\csv\2026-04-25\olist_order_items_dataset.csv
+2026-04-25 09:30:57 | INFO     | csv_ingestion |   MD5 checksum: f4fa76976662e9cba0633f9e49ed2645
+2026-04-25 09:30:57 | INFO     | csv_ingestion |   Metadata written: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\order_items\csv\2026-04-25\olist_order_items_dataset.csv.meta.json
+2026-04-25 09:30:57 | INFO     | csv_ingestion |   [OK] SUCCESS - olist_order_items_dataset.csv
+2026-04-25 09:30:57 | INFO     | csv_ingestion | --------------------------------------------------
+2026-04-25 09:30:57 | INFO     | csv_ingestion | Ingesting: olist_order_reviews_dataset.csv  ->  source=order_reviews
+2026-04-25 09:30:57 | INFO     | csv_ingestion |   Reading source: D:\Data\Portfolio\Projects\Python\e2e-pipeline\dataset\olist_order_reviews_dataset.csv
+2026-04-25 09:30:58 | INFO     | csv_ingestion |   Rows=99,224  Columns=7  Cols=['review_id', 'order_id', 'review_score', 'review_comment_title', 'review_comment_message', 'review_creation_date', 'review_answer_timestamp']
+2026-04-25 09:30:58 | INFO     | csv_ingestion |   Copied to: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\order_reviews\csv\2026-04-25\olist_order_reviews_dataset.csv
+2026-04-25 09:30:58 | INFO     | csv_ingestion |   MD5 checksum: 914066be00d2db0c3d857f071cff1688
+2026-04-25 09:30:58 | INFO     | csv_ingestion |   Metadata written: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\order_reviews\csv\2026-04-25\olist_order_reviews_dataset.csv.meta.json
+2026-04-25 09:30:58 | INFO     | csv_ingestion |   [OK] SUCCESS - olist_order_reviews_dataset.csv
+2026-04-25 09:30:58 | INFO     | csv_ingestion | --------------------------------------------------
+2026-04-25 09:30:58 | INFO     | csv_ingestion | Ingesting: olist_order_payments_dataset.csv  ->  source=order_payments
+2026-04-25 09:30:58 | INFO     | csv_ingestion |   Reading source: D:\Data\Portfolio\Projects\Python\e2e-pipeline\dataset\olist_order_payments_dataset.csv
+2026-04-25 09:30:58 | INFO     | csv_ingestion |   Rows=103,886  Columns=5  Cols=['order_id', 'payment_sequential', 'payment_type', 'payment_installments', 'payment_value']
+2026-04-25 09:30:58 | INFO     | csv_ingestion |   Copied to: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\order_payments\csv\2026-04-25\olist_order_payments_dataset.csv
+2026-04-25 09:30:58 | INFO     | csv_ingestion |   MD5 checksum: 75ce0c041d18e5f250c5cea9a8042944
+2026-04-25 09:30:58 | INFO     | csv_ingestion |   Metadata written: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\order_payments\csv\2026-04-25\olist_order_payments_dataset.csv.meta.json
+2026-04-25 09:30:58 | INFO     | csv_ingestion |   [OK] SUCCESS - olist_order_payments_dataset.csv
+2026-04-25 09:30:58 | INFO     | csv_ingestion | --------------------------------------------------
+2026-04-25 09:30:58 | INFO     | csv_ingestion | Ingesting: olist_sellers_dataset.csv  ->  source=sellers
+2026-04-25 09:30:58 | INFO     | csv_ingestion |   Reading source: D:\Data\Portfolio\Projects\Python\e2e-pipeline\dataset\olist_sellers_dataset.csv
+2026-04-25 09:30:58 | INFO     | csv_ingestion |   Rows=3,095  Columns=4  Cols=['seller_id', 'seller_zip_code_prefix', 'seller_city', 'seller_state']
+2026-04-25 09:30:58 | INFO     | csv_ingestion |   Copied to: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\sellers\csv\2026-04-25\olist_sellers_dataset.csv
+2026-04-25 09:30:58 | INFO     | csv_ingestion |   MD5 checksum: 5b22c02facdf842d6c0aea36e1849018
+2026-04-25 09:30:58 | INFO     | csv_ingestion |   Metadata written: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\sellers\csv\2026-04-25\olist_sellers_dataset.csv.meta.json
+2026-04-25 09:30:58 | INFO     | csv_ingestion |   [OK] SUCCESS - olist_sellers_dataset.csv
+2026-04-25 09:30:58 | INFO     | csv_ingestion | --------------------------------------------------
+2026-04-25 09:30:58 | INFO     | csv_ingestion | Ingesting: olist_geolocation_dataset.csv  ->  source=geolocation
+2026-04-25 09:30:58 | INFO     | csv_ingestion |   Reading source: D:\Data\Portfolio\Projects\Python\e2e-pipeline\dataset\olist_geolocation_dataset.csv
+2026-04-25 09:30:59 | INFO     | csv_ingestion |   Rows=1,000,163  Columns=5  Cols=['geolocation_zip_code_prefix', 'geolocation_lat', 'geolocation_lng', 'geolocation_city', 'geolocation_state']
+2026-04-25 09:30:59 | INFO     | csv_ingestion |   Copied to: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\geolocation\csv\2026-04-25\olist_geolocation_dataset.csv
+2026-04-25 09:30:59 | INFO     | csv_ingestion |   MD5 checksum: 6d8464e41c8e2013955e437b6b4fafbd
+2026-04-25 09:30:59 | INFO     | csv_ingestion |   Metadata written: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\geolocation\csv\2026-04-25\olist_geolocation_dataset.csv.meta.json
+2026-04-25 09:30:59 | INFO     | csv_ingestion |   [OK] SUCCESS - olist_geolocation_dataset.csv
+2026-04-25 09:30:59 | INFO     | csv_ingestion | --------------------------------------------------
+2026-04-25 09:30:59 | INFO     | csv_ingestion | Ingesting: product_category_name_translation.csv  ->  source=product_category_name_translation
+2026-04-25 09:30:59 | INFO     | csv_ingestion |   Reading source: D:\Data\Portfolio\Projects\Python\e2e-pipeline\dataset\product_category_name_translation.csv
+2026-04-25 09:30:59 | INFO     | csv_ingestion |   Rows=71  Columns=2  Cols=['product_category_name', 'product_category_name_english']
+2026-04-25 09:30:59 | INFO     | csv_ingestion |   Copied to: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\product_category_name_translation\csv\2026-04-25\product_category_name_translation.csv
+2026-04-25 09:30:59 | INFO     | csv_ingestion |   MD5 checksum: 4196d142e8f2b9697521fc50c97f626b
+2026-04-25 09:30:59 | INFO     | csv_ingestion |   Metadata written: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\product_category_name_translation\csv\2026-04-25\product_category_name_translation.csv.meta.json
+2026-04-25 09:30:59 | INFO     | csv_ingestion |   [OK] SUCCESS - product_category_name_translation.csv
+2026-04-25 09:30:59 | INFO     | csv_ingestion | ======================================================================
+2026-04-25 09:30:59 | INFO     | csv_ingestion | CSV BATCH INGESTION - COMPLETE
+2026-04-25 09:30:59 | INFO     | csv_ingestion |   Total files : 9
+2026-04-25 09:30:59 | INFO     | csv_ingestion |   Succeeded   : 9
+2026-04-25 09:30:59 | INFO     | csv_ingestion |   Failed      : 0
+2026-04-25 09:30:59 | INFO     | csv_ingestion | ======================================================================
+2026-04-25 09:30:59 | INFO     | csv_ingestion |   Run summary written to: D:\Data\Portfolio\Projects\Python\e2e-pipeline\logs\csv_ingestion_summary_20260425_093059.json

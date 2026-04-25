@@ -1,0 +1,81 @@
+2026-04-25 09:31:08 | INFO     | preparation | ======================================================================
+2026-04-25 09:31:08 | INFO     | preparation | DATA PREPARATION & EDA - START
+2026-04-25 09:31:08 | INFO     | preparation |   Timestamp : 2026-04-25T09:31:08.469867
+2026-04-25 09:31:08 | INFO     | preparation |   Raw layer : D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw
+2026-04-25 09:31:08 | INFO     | preparation | ======================================================================
+2026-04-25 09:31:08 | INFO     | preparation | [1] Loading datasets...
+2026-04-25 09:31:08 | INFO     | preparation |   Loading customers from ingested raw layer: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\customers\csv\2026-04-25\olist_customers_dataset.csv
+2026-04-25 09:31:08 | INFO     | preparation |     -> 99,441 rows x 5 cols
+2026-04-25 09:31:08 | INFO     | preparation |   Loading products from ingested raw layer: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\products\csv\2026-04-25\olist_products_dataset.csv
+2026-04-25 09:31:08 | INFO     | preparation |     -> 32,951 rows x 9 cols
+2026-04-25 09:31:08 | INFO     | preparation |   Loading orders from ingested raw layer: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\orders\csv\2026-04-25\olist_orders_dataset.csv
+2026-04-25 09:31:09 | INFO     | preparation |     -> 99,441 rows x 8 cols
+2026-04-25 09:31:09 | INFO     | preparation |   Loading order_items from ingested raw layer: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\order_items\csv\2026-04-25\olist_order_items_dataset.csv
+2026-04-25 09:31:09 | INFO     | preparation |     -> 112,650 rows x 7 cols
+2026-04-25 09:31:09 | INFO     | preparation |   Loading reviews from ingested raw layer: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\order_reviews\csv\2026-04-25\olist_order_reviews_dataset.csv
+2026-04-25 09:31:10 | INFO     | preparation |     -> 99,224 rows x 7 cols
+2026-04-25 09:31:10 | INFO     | preparation |   Loading payments from ingested raw layer: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\order_payments\csv\2026-04-25\olist_order_payments_dataset.csv
+2026-04-25 09:31:10 | INFO     | preparation |     -> 103,886 rows x 5 cols
+2026-04-25 09:31:10 | INFO     | preparation |   Loading sellers from ingested raw layer: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\sellers\csv\2026-04-25\olist_sellers_dataset.csv
+2026-04-25 09:31:10 | INFO     | preparation |     -> 3,095 rows x 4 cols
+2026-04-25 09:31:10 | INFO     | preparation |   Loading geolocation from ingested raw layer: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\geolocation\csv\2026-04-25\olist_geolocation_dataset.csv
+2026-04-25 09:31:10 | INFO     | preparation |     -> 1,000,163 rows x 5 cols
+2026-04-25 09:31:10 | INFO     | preparation |   Loading categories from ingested raw layer: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake/raw\product_category_name_translation\csv\2026-04-25\product_category_name_translation.csv
+2026-04-25 09:31:10 | INFO     | preparation |     -> 71 rows x 2 cols
+2026-04-25 09:31:10 | INFO     | preparation | [2] Cleaning datasets...
+2026-04-25 09:31:10 | INFO     | preparation |   Cleaning customers...
+2026-04-25 09:31:11 | INFO     | preparation |     -> 96,096 unique customers
+2026-04-25 09:31:11 | INFO     | preparation |   Cleaning products...
+2026-04-25 09:31:11 | INFO     | preparation |     Imputed product_name_lenght: 0 remaining nulls (median=51.0)
+2026-04-25 09:31:11 | INFO     | preparation |     Imputed product_description_lenght: 0 remaining nulls (median=595.0)
+2026-04-25 09:31:11 | INFO     | preparation |     Imputed product_photos_qty: 0 remaining nulls (median=1.0)
+2026-04-25 09:31:11 | INFO     | preparation |     Imputed product_weight_g: 0 remaining nulls (median=700.0)
+2026-04-25 09:31:11 | INFO     | preparation |     Imputed product_length_cm: 0 remaining nulls (median=25.0)
+2026-04-25 09:31:11 | INFO     | preparation |     Imputed product_height_cm: 0 remaining nulls (median=13.0)
+2026-04-25 09:31:11 | INFO     | preparation |     Imputed product_width_cm: 0 remaining nulls (median=20.0)
+2026-04-25 09:31:11 | INFO     | preparation |     -> 32,951 products, 72 categories
+2026-04-25 09:31:11 | INFO     | preparation |   Cleaning orders...
+2026-04-25 09:31:11 | INFO     | preparation |     Retained all 99,441 orders (no status filter — matches notebook methodology)
+2026-04-25 09:31:11 | INFO     | preparation |   Cleaning reviews...
+2026-04-25 09:31:11 | INFO     | preparation |     -> 99,224 reviews, 40,977 with text
+2026-04-25 09:31:11 | INFO     | preparation |   Cleaning payments...
+2026-04-25 09:31:11 | INFO     | preparation |     -> 99,440 orders with payment info
+2026-04-25 09:31:11 | INFO     | preparation |   Cleaning geolocation...
+2026-04-25 09:31:11 | INFO     | preparation |     -> 19,008 unique zip codes
+2026-04-25 09:31:11 | INFO     | preparation | [3] Building transactions...
+2026-04-25 09:31:11 | INFO     | preparation |   Building unified transaction dataset...
+2026-04-25 09:31:11 | INFO     | preparation |     orders x items: 112,650
+2026-04-25 09:31:11 | INFO     | preparation |     + reviews: 113,314
+2026-04-25 09:31:12 | INFO     | preparation |     + payments: 113,314
+2026-04-25 09:31:12 | INFO     | preparation |     + customers: 113,314
+2026-04-25 09:31:12 | INFO     | preparation |     + products: 113,314
+2026-04-25 09:31:12 | INFO     | preparation |     Final transaction dataset: 113,314 rows x 27 cols
+2026-04-25 09:31:12 | INFO     | preparation | [4] Building interaction matrix...
+2026-04-25 09:31:12 | INFO     | preparation |   Building user-item interaction matrix...
+2026-04-25 09:31:12 | INFO     | preparation |     Users: 95,378  Items: 32,157  Interactions: 98,892
+2026-04-25 09:31:12 | INFO     | preparation |     Sparsity: 99.9968%
+2026-04-25 09:31:12 | INFO     | preparation | [5] Generating EDA plots...
+2026-04-25 09:31:12 | INFO     | preparation |   Generating EDA plots...
+2026-04-25 09:31:12 | INFO     | preparation |     [OK] 01_review_score_distribution.png
+2026-04-25 09:31:13 | INFO     | preparation |     [OK] 02_top_categories.png
+2026-04-25 09:31:13 | INFO     | preparation |     [OK] 03_item_popularity_long_tail.png
+2026-04-25 09:31:13 | INFO     | preparation |     [OK] 04_user_activity_distribution.png
+2026-04-25 09:31:14 | INFO     | preparation |     [OK] 05_monthly_purchase_volume.png
+2026-04-25 09:31:14 | INFO     | preparation |     [OK] 06_purchase_heatmap.png
+2026-04-25 09:31:14 | INFO     | preparation |     [OK] 07_price_distribution.png
+2026-04-25 09:31:14 | INFO     | preparation |     [OK] 08_payment_type_distribution.png
+2026-04-25 09:31:14 | INFO     | preparation |   All plots saved to: D:\Data\Portfolio\Projects\Python\e2e-pipeline\reports\20260425_093108_eda_plots
+2026-04-25 09:31:14 | INFO     | preparation | [6] Saving prepared datasets...
+2026-04-25 09:31:17 | INFO     | preparation |     Transactions: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake\curated\prepared\2026-04-25\transactions.csv (113,314 rows)
+2026-04-25 09:31:18 | INFO     | preparation |     Interactions: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake\curated\prepared\2026-04-25\user_item_interactions.csv (98,892 rows)
+2026-04-25 09:31:18 | INFO     | preparation |     Products: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake\curated\prepared\2026-04-25\products_cleaned.csv (32,951 rows)
+2026-04-25 09:31:18 | INFO     | preparation |     Customers: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake\curated\prepared\2026-04-25\customers_cleaned.csv (96,096 rows)
+2026-04-25 09:31:18 | INFO     | preparation |     Summary: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake\curated\prepared\2026-04-25\20260425_093108_preparation_summary.json
+2026-04-25 09:31:18 | INFO     | preparation | ======================================================================
+2026-04-25 09:31:18 | INFO     | preparation | DATA PREPARATION & EDA - COMPLETE
+2026-04-25 09:31:18 | INFO     | preparation |   Transactions : 113,314
+2026-04-25 09:31:18 | INFO     | preparation |   Users        : 95,378
+2026-04-25 09:31:18 | INFO     | preparation |   Products     : 32,951
+2026-04-25 09:31:18 | INFO     | preparation |   Interactions : 98,892
+2026-04-25 09:31:18 | INFO     | preparation |   Sparsity     : 99.9969%
+2026-04-25 09:31:18 | INFO     | preparation | ======================================================================

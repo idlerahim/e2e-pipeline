@@ -1,0 +1,9 @@
+2026-04-25 09:32:17 | INFO     | feature_store | [REGISTER] Creating snapshot: v_20260425_093217
+2026-04-25 09:32:17 | INFO     | feature_store |   Source DB: D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake\curated\features\2026-04-25\features.db
+2026-04-25 09:32:17 | INFO     | feature_store |   Copied DB -> D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake\serving\feature_store\v_20260425_093217\features.db
+2026-04-25 09:32:17 | INFO     | feature_store |   Copied registry -> D:\Data\Portfolio\Projects\Python\e2e-pipeline\data_lake\serving\feature_store\v_20260425_093217\feature_registry.json
+2026-04-25 09:32:17 | INFO     | feature_store |   Snapshot v_20260425_093217 registered successfully
+2026-04-25 09:32:17 | INFO     | feature_store |   Feature groups: ['user_features', 'item_features', 'interaction_features']
+2026-04-25 09:32:17 | INFO     | feature_store |     user_features: 95378 rows, 16 features
+2026-04-25 09:32:17 | INFO     | feature_store |     item_features: 32951 rows, 28 features
+2026-04-25 09:32:17 | INFO     | feature_store |     interaction_features: 98892 rows, 7 features

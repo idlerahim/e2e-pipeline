@@ -1,0 +1,63 @@
+{
+  "total_files": 18,
+  "data_files": 9,
+  "metadata_files": 9,
+  "total_size_bytes": 126192621,
+  "by_source": {
+    "customers": {
+      "files": 2,
+      "size_bytes": 9034553,
+      "rows": 99441
+    },
+    "geolocation": {
+      "files": 2,
+      "size_bytes": 61274497,
+      "rows": 1000163
+    },
+    "orders": {
+      "files": 2,
+      "size_bytes": 17655606,
+      "rows": 99441
+    },
+    "order_items": {
+      "files": 2,
+      "size_bytes": 15439289,
+      "rows": 112650
+    },
+    "order_payments": {
+      "files": 2,
+      "size_bytes": 5777741,
+      "rows": 103886
+    },
+    "order_reviews": {
+      "files": 2,
+      "size_bytes": 14452330,
+      "rows": 99224
+    },
+    "products": {
+      "files": 2,
+      "size_bytes": 2380155,
+      "rows": 32951
+    },
+    "product_category_name_translation": {
+      "files": 2,
+      "size_bytes": 3193,
+      "rows": 71
+    },
+    "sellers": {
+      "files": 2,
+      "size_bytes": 175257,
+      "rows": 3095
+    }
+  },
+  "by_type": {
+    "csv": {
+      "files": 18,
+      "size_bytes": 126192621
+    }
+  },
+  "partitions": [
+    "2026-04-25"
+  ],
+  "total_size_human": "120.3 MB"
+}
