@@ -139,7 +139,11 @@ def clean_products(df: pd.DataFrame, cat_df: pd.DataFrame, logger) -> pd.DataFra
 
 
 def clean_orders(df: pd.DataFrame, logger) -> pd.DataFrame:
-    """Parse timestamps, filter to delivered orders."""
+    """Parse timestamps for all orders (no status filter).
+
+    All order statuses are retained to maximise cross-category purchase signal
+    for the KNN collaborative filtering model, matching the notebook methodology.
+    """
     logger.info("  Cleaning orders...")
     date_cols = ["order_purchase_timestamp", "order_approved_at",
                  "order_delivered_carrier_date", "order_delivered_customer_date",
@@ -147,13 +151,25 @@ def clean_orders(df: pd.DataFrame, logger) -> pd.DataFrame:
     for col in date_cols:
         df[col] = pd.to_datetime(df[col], errors="coerce")
 
-    # Keep only delivered orders for model training
-    total = len(df)
-    df_delivered = df[df["order_status"] == "delivered"].copy()
-    logger.info(f"    Filtered: {total:,} -> {len(df_delivered):,} delivered orders "
-                f"({len(df_delivered)/total*100:.1f}%)")
-    return df_delivered
+    logger.info(f"    Retained all {len(df):,} orders (no status filter — matches notebook methodology)")
+    return df.copy()
 
+# # Old Logic (~700 rows)
+# def clean_orders(df: pd.DataFrame, logger) -> pd.DataFrame:
+#     """Parse timestamps, filter to delivered orders."""
+#     logger.info("  Cleaning orders...")
+#     date_cols = ["order_purchase_timestamp", "order_approved_at",
+#                  "order_delivered_carrier_date", "order_delivered_customer_date",
+#                  "order_estimated_delivery_date"]
+#     for col in date_cols:
+#         df[col] = pd.to_datetime(df[col], errors="coerce")
+
+#     # Keep only delivered orders for model training
+#     total = len(df)
+#     df_delivered = df[df["order_status"] == "delivered"].copy()
+#     logger.info(f"    Filtered: {total:,} -> {len(df_delivered):,} delivered orders "
+#                 f"({len(df_delivered)/total*100:.1f}%)")
+#     return df_delivered
 
 def clean_reviews(df: pd.DataFrame, logger) -> pd.DataFrame:
     """Ensure review_score is int, handle missing text."""

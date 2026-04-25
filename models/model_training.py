@@ -186,19 +186,24 @@ def train_knn_model(all_data_df, train_df, test_df):
         else:
             cat_col = 'product_category_name'
 
-        # Merge all_data_df with categories
+        # To match the notebook, we filter on the full dataset FIRST, 
+        # but build the grid ONLY from the train split.
         merged_all = pd.merge(all_data_df, products_df[['product_id', cat_col]], on='product_id', how='left')
         merged_all[cat_col] = merged_all[cat_col].fillna('unknown')
 
         # Filter users with 2 or more distinct categories
         user_cat_counts = merged_all.groupby('customer_unique_id')[cat_col].nunique()
         multi_cat_users = user_cat_counts[user_cat_counts >= 2].index
-        merged_filtered = merged_all[merged_all['customer_unique_id'].isin(multi_cat_users)]
+        
+        # Prepare Train Data
+        train_merged = pd.merge(train_df, products_df[['product_id', cat_col]], on='product_id', how='left')
+        train_merged[cat_col] = train_merged[cat_col].fillna('unknown')
+        train_filtered = train_merged[train_merged['customer_unique_id'].isin(multi_cat_users)]
 
-        print(f"Users with 2+ categories: {merged_filtered['customer_unique_id'].nunique()}")
+        print(f"Users with 2+ categories in Train: {train_filtered['customer_unique_id'].nunique()}")
 
-        # Pivot
-        user_item_grid = merged_filtered.pivot_table(
+        # Pivot using ONLY Train Data
+        user_item_grid = train_filtered.pivot_table(
             index='customer_unique_id', 
             columns=cat_col, 
             values='rating'
@@ -207,11 +212,13 @@ def train_knn_model(all_data_df, train_df, test_df):
         nn = NearestNeighbors(n_neighbors=min(k + 1, user_item_grid.shape[0]), metric="cosine", algorithm='brute')
         nn.fit(user_item_grid)
 
-        # Merge test_df to get categories like KNN Model.py's test_data
+        # Prepare Test Data
         test_merged = pd.merge(test_df, products_df[['product_id', cat_col]], on='product_id', how='left')
         test_merged[cat_col] = test_merged[cat_col].fillna('unknown')
+        test_filtered = test_merged[test_merged['customer_unique_id'].isin(multi_cat_users)]
+        
         # rename columns to match KNN Model.py's expectations
-        test_data = test_merged.rename(columns={
+        test_data = test_filtered.rename(columns={
             'customer_unique_id': 'user_number', 
             'rating': 'review_score', 
             cat_col: 'product_category_name_english'
