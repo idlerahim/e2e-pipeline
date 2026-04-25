@@ -1,0 +1,36 @@
+#Here are detailed steps
+
+1. Business Problem
+
+2. python ingestion/ingest_csv.py -> This loads from dataset folder and put into datalake/raw
+
+3. python -m storage.storage_manager -> This generates catalogue and helps storing data in datalake in next steps
+   python -m storage.storage_manager --verify -> for checking data storage in datalake
+
+4. python -m validation.validate_data -> This validates and logs for auditing
+
+5. python -m preparation.prepare_data -> This cleans & merge data, build EDA plots & report
+
+6. python -m transformation.feature_engineering -> Generates features.db & data in curated
+
+7. Registers features as features.db & generates training_sets csv, basically moves data from curated to serving folder
+    » python -m feature_store.feature_store_manager --register
+    » python -m feature_store.feature_store_manager --status » python -m feature_store.feature_store_manager --training-set » sqlite3 "data_lake\serving\feature_store\v_20260424_224132\features.db" "SELECT DISTINCT customer_unique_id FROM user_features LIMIT 20;"
+    » python -m feature_store.feature_store_manager --query-users "0000366f3b9a7992bf8c76cfdf3221e2, 0000b849f77a49e4a4ce2b2a4ca5be3f"
+    » sqlite3 "data_lake\serving\feature_store\v_20260424_224132\features.db" "SELECT DISTINCT product_id FROM item_features LIMIT 20;"
+    » python -m feature_store.feature_store_manager --query-items "00066f42aeeb9f3007548bb9d3f33c38, 00088930e925c41fd95ebfe695fd2655"
+
+8. This is for version history and tracking
+	Rename-Item _dataset.dvc_  dataset.dvc
+	Rename-Item _data_lake.dvc_ data_lake.dvc
+	Rename-Item _mlruns.dvc_   mlruns.dvc
+
+9. This takes data from training_sets folder and trains KNN model and saves artefacts in /mlruns folder\
+    » python -m models.model_training
+
+10. Runs perfect service using below commands
+	- prefect config set PREFECT_MESSAGING_BROKER='prefect.server.utilities.messaging.memory
+	- prefect server start
+	- prefect work-pool create -t process "default-work-pool"
+	- prefect deploy orchestration/pipeline_flow.py:rocomart_data_pipeline -n "RocoMart Pipeline" -p default-work-pool
+	- python -m prefect worker start -p "default-work-pool"
