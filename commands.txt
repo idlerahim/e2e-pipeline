@@ -24,13 +24,29 @@
 	Rename-Item _dataset.dvc_  dataset.dvc
 	Rename-Item _data_lake.dvc_ data_lake.dvc
 	Rename-Item _mlruns.dvc_   mlruns.dvc
+	dvc add dataset/
+	dvc add data_lake/
+	dvc add mlruns/
+	git add dataset.dvc data_lake.dvc mlruns.dvc .gitignore
+	dvc remote add -d localstore D:\Data\Portfolio\Projects\Python\dvc
+	git commit -m "chore: update DVC pointers after pipeline run"
+	dvc push   # pushes actual data to remote (S3, GDrive, etc.)
 
 9. This takes data from training_sets folder and trains KNN model and saves artefacts in /mlruns folder\
     » python -m models.model_training
 
-10. Runs perfect service using below commands
+10. Runs prefect service using below commands
 	- prefect config set PREFECT_MESSAGING_BROKER='prefect.server.utilities.messaging.memory
 	- prefect server start
 	- prefect work-pool create -t process "default-work-pool"
 	- prefect deploy orchestration/pipeline_flow.py:rocomart_data_pipeline -n "RocoMart Pipeline" -p default-work-pool
 	- python -m prefect worker start -p "default-work-pool"
+
+
+# git
+git shortlog -s -n -e --all
+git log --oneline --graph -10
+dvc status
+dvc exp show
+dvc dag
+dvc remote list
