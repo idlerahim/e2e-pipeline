@@ -78,19 +78,19 @@ def load_product_features():
             print(f"Loading product features from: {features_file}")
             return pd.read_csv(features_file)
 
-    # Fallback to the raw product dataset if curated item features are unavailable
+    # Product Categories with translated names
     products_path = "dataset/olist_products_dataset.csv"
     translation_path = "dataset/product_category_name_translation.csv"
     
     if os.path.exists(products_path):
-        print(f"Loading product features from fallback dataset: {products_path}")
+        print(f"Loading product features from product categories with translated names: {products_path}")
         prod_df = pd.read_csv(products_path)
         if os.path.exists(translation_path):
             trans_df = pd.read_csv(translation_path)
             prod_df = pd.merge(prod_df, trans_df, on='product_category_name', how='left')
         return prod_df
 
-    raise FileNotFoundError("No item features file found and no fallback dataset available")
+    raise FileNotFoundError("No item features file found and no product categories with translated names available")
 
 
 def compute_ranking_metrics_from_predictions(predictions, k_values=[5, 10]):
@@ -272,7 +272,7 @@ def train_knn_model(all_data_df, train_df, test_df):
             user_item_grid.to_csv(grid_path)
             mlflow.log_artifact(grid_path)
 
-        mlflow.sklearn.log_model(nn, "model")
+        mlflow.sklearn.log_model(nn, name="model")
 
         ranking_metrics = {'precision@5': avg_p, 'recall@5': avg_r, 'ndcg@5': avg_n}
         print(f"KNN (Category User-Based) - Precision@5: {avg_p:.4f}, Recall@5: {avg_r:.4f}, NDCG@5: {avg_n:.4f}")
