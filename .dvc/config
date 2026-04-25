@@ -1,0 +1,4 @@
+[core]
+    remote = localstore
+['remote "localstore"']
+    url = D:\Data\Portfolio\Projects\Python\dvc
