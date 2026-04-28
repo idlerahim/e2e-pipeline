@@ -1,65 +1,54 @@
+<p align="center">
+  <img src="docs/supporting_files/RecoMart-Banner.png" alt="RecoMart Banner" width="100%">
+</p>
+
 # RecoMart End-to-End Recommendation Pipeline
 
-RecoMart is an end-to-end e-commerce product recommendation pipeline. This project demonstrates a complete machine learning lifecycle—from raw data ingestion and validation to feature engineering, model training, and real-time REST API serving.
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.9+-blue.svg" alt="Python Version">
+  <img src="https://img.shields.io/badge/ML-KNN%20Collaborative%20Filtering-brightgreen.svg" alt="Model Type">
+  <img src="https://img.shields.io/badge/Tracking-MLflow-orange.svg" alt="MLflow">
+  <img src="https://img.shields.io/badge/Framework-Flask-lightgrey.svg" alt="Flask">
+  <img src="https://img.shields.io/badge/License-MIT-green.svg" alt="License">
+</p>
 
-## Overview
+RecoMart is a production-grade e-commerce recommendation engine built on the Brazilian E-Commerce Public Dataset. It automates the full ML lifecycle—from data ingestion to real-time inference.
 
-The system processes 9 interconnected datasets (customers, products, orders, reviews, etc.) to build a **Memory-based Category User-User K-Nearest Neighbors (KNN)** collaborative filtering model. The model identifies users with similar categorical purchase affinities to provide highly personalized, diverse product recommendations.
+## 🏗️ Pipeline Architecture
 
-## Architecture
+![Pipeline Architecture](docs/supporting_files/Pipeline_Architecture.png)
 
-The pipeline consists of the following automated stages:
-1. **Data Ingestion (`script_2_download_extract_data.ps1`)**: Downloads the Brazilian e-commerce dataset from Kaggle and extracts it.
-2. **Raw Data Storage (`storage/`)**: Manages the data lake architecture for raw incoming datasets.
-3. **Data Validation (`validation/`)**: Performs automated quality checks (schema, missing values, duplicates, bounds).
-4. **Data Preparation & EDA (`preparation/`)**: Cleans data, merges transactions, and generates exploratory data analysis plots.
-5. **Feature Engineering (`transformation/`)**: Creates user, item, and interaction features, applying necessary log transforms and Min-Max normalizations.
-6. **Feature Store (`feature_store/`)**: A custom lightweight feature store with snapshot versioning and point-in-time correctness for generating ML training matrices.
-7. **Model Training (`models/`)**: Trains the KNN model and tracks ranking metrics (Precision@K, Recall@K, NDCG@K) and artifacts using **MLflow**.
-8. **Inference API (`inference/`)**: A Flask-based REST API that dynamically loads the latest model and artifacts from MLflow to serve real-time recommendations.
+The system identifies users with similar categorical purchase affinities using a **Memory-based User-User KNN** model.
 
-## Quick Start
+1.  **Ingestion & Validation**: Automated data retrieval and schema/quality checks.
+2.  **Feature Store**: Custom versioned store for point-in-time interaction features.
+3.  **MLflow Tracking**: Model versioning, hyperparameter tuning, and metric logging.
+4.  **Inference API**: High-performance Flask REST API for real-time recommendations.
 
-### 1. Install Dependencies
+## 🚀 Quick Start
+
+### 1. Setup
 ```bash
 pip install -r requirements.txt
+./script_3_run_pipeline.ps1  # Runs full E2E pipeline
 ```
 
-### 2. Run the Full Pipeline
-You can run the entire pipeline end-to-end using the provided PowerShell script:
+### 2. Monitoring & Serving
+*   **MLflow Dashboard:** Run `mlflow ui` and visit `http://localhost:5000`
+*   **Start API:** `python -m inference.inference_api --port 8000`
+
+### 3. Example Request
 ```powershell
-./script_3_run_pipeline.ps1
+Invoke-RestMethod -Uri "http://127.0.0.1:8000/recommend-categories" -Method Post -ContentType "application/json" -Body '{"categories": ["bed_bath_table"], "n_items": 5}'
 ```
 
-### 3. View MLflow Dashboard
-View model training metrics and artifacts:
-```bash
-mlflow ui
-# Navigate to http://localhost:5000
-```
-
-### 4. Start the Inference API
-Serve real-time recommendations via the REST API:
-```bash
-python -m inference.inference_api --port 8000 --host 0.0.0.0
-```
-
-#### Example API Request (Category Affinity)
-```powershell
-Invoke-RestMethod -Uri "http://127.0.0.1:8000/recommend-categories" -Method Post -ContentType "application/json" -Body '{"categories": ["bed_bath_table", "furniture_decor"], "n_items": 5}' | ConvertTo-Json -Depth 5
-```
-*(You can also visit `http://127.0.0.1:8000/recommend-categories?category=bed_bath_table&n_items=5` directly in your browser!)*
-
-## Documentation
-
-For a detailed breakdown of each stage, please refer to the markdown reports in the `docs/` folder:
-- [Task 1: Problem Formulation](docs/Task1_Problem_Formulation.md)
-- [Task 3: Raw Data Storage](docs/Task3_Raw_Data_Storage.md)
-- [Task 4: Data Validation](docs/Task4_Data_Validation.md)
-- [Task 5: Data Preparation](docs/Task5_Data_Preparation.md)
-- [Task 6: Feature Engineering](docs/Task6_Feature_Engineering.md)
-- [Task 7: Feature Store](docs/Task7_Feature_Store.md)
-- [Task 9: Model Training & Prediction](docs/Task9_Model_Training_Prediction.md)
+## 📖 Documentation
+Detailed technical reports for each stage:
+*   [Phase 1: Problem & Ingestion](docs/Task1_Problem_Formulation.md)
+*   [Phase 2: Validation & Prep](docs/Task4_Data_Validation.md)
+*   [Phase 3: Feature Engineering & Store](docs/Task7_Feature_Store.md)
+*   [Phase 4: Model Training (MLflow)](docs/Task9_Model_Training_Prediction.md)
 
 ---
 *Built for RecoMart e-commerce personalization.*
+
