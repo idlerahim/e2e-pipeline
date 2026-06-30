@@ -16,7 +16,70 @@ RecoMart is a production-grade e-commerce recommendation engine built on the Bra
 
 ## 🏗️ Pipeline Architecture
 
-![Pipeline Architecture](docs/supporting_files/Pipeline_Architecture.png)
+```mermaid
+graph LR
+    %% Custom Styling Definitions
+    classDef greenStore fill:#10B981,stroke:#065F46,stroke-width:2px,color:#fff;
+    classDef orangeProcess fill:#F59E0B,stroke:#92400E,stroke-width:2px,color:#fff;
+    classDef purpleTask fill:#8B5CF6,stroke:#5B21B6,stroke-width:2px,color:#fff;
+    classDef blueOutput fill:#3B82F6,stroke:#1E40AF,stroke-width:2px,color:#fff;
+    classDef whiteAlert fill:#FFFFFF,stroke:#000000,stroke-width:2px,color:#000;
+
+    %% Data Sources & Ingestion
+    subgraph Data_Ingestion [ ]
+        style Data_Ingestion fill:none,stroke:none;
+        API[(API)]:::greenStore
+        CSV[(CSV)]:::greenStore
+        Ingestion[Ingestion]:::orangeProcess
+    end
+
+    %% Core Data Flow
+    DataLake[(Data Lake)]:::greenStore
+    Validation{Validation}:::orangeProcess
+    Preparation[Preparation]:::orangeProcess
+    Alert[Alert]:::whiteAlert
+
+    Feature[Feature]:::orangeProcess
+    FeatureStore[(Feature Store)]:::greenStore
+    Training[Training]:::purpleTask
+
+    MLflow[(MLflow)]:::greenStore
+    Evaluation[Evaluation]:::purpleTask
+
+    Flask[Flask]:::blueOutput
+
+    %% Output Deliverables
+    subgraph Outputs [ ]
+        style Outputs fill:none,stroke:none;
+        Batch([Batch Recommendations]):::blueOutput
+        Live([Live Inferences]):::blueOutput
+        Rank([Rank Based for Unseen Data]):::blueOutput
+    end
+
+    %% Connections
+    API --> Ingestion
+    CSV --> Ingestion
+    Ingestion --> DataLake
+    DataLake --> Validation
+
+    %% Validation Paths
+    Validation -- Pass --> Preparation
+    Validation -- Fail --> Alert
+    Preparation --> Feature
+    Feature --> FeatureStore
+
+    %% Feature Store & Training
+    FeatureStore --> Training
+    FeatureStore --> MLflow
+    MLflow --> Evaluation
+
+    %% Deployment & Serving
+    MLflow --> Flask
+    Flask --> Batch
+    Flask --> Live
+    Flask --> Rank
+```
+_Pipeline Architecture_
 
 The system identifies users with similar categorical purchase affinities using a **Memory-based User-User KNN** model.
 
